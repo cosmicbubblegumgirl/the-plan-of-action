@@ -32,7 +32,7 @@ This GitHub Pages app has no server-side database. Device profiles and learner c
 
 ## GitHub Pages
 
-The included `.github/workflows/pages.yml` deploys the root of the `main` branch to GitHub Pages.
+Publish the root of the `main` branch with GitHub Pages.
 
 ## Disclaimer
 
