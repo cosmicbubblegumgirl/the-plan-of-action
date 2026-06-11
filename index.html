@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081a2f">
+  <meta name="description" content="The Plan of Action: an unofficial SAP C_CPI_2601 Integration Developer study and system-based assessment simulator.">
+  <title>The Plan of Action · C_CPI_2601</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M8 9h48v13L34 55H8z" fill="currentColor"/>
+        <path d="M19 21h25M19 30h18M19 39h11" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="47" cy="39" r="8" fill="#40d5dc"/>
+        <path d="m44 39 2 2 4-5" fill="none" stroke="#06223d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <strong>The Plan of Action</strong>
+    <span>Preparing your workspace...</span>
+  </div>
+
+  <div class="app-shell" id="appShell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#dashboard" data-nav="dashboard" aria-label="The Plan of Action home">
+        <span class="brand-logo">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M8 9h48v13L34 55H8z" fill="currentColor"/>
+            <path d="M19 21h25M19 30h18M19 39h11" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="47" cy="39" r="8" fill="#40d5dc"/>
+            <path d="m44 39 2 2 4-5" fill="none" stroke="#06223d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>The Plan of Action</strong>
+          <small>C_CPI_2601</small>
+        </span>
+      </a>
+
+      <nav class="primary-nav" id="primaryNav" aria-label="Application navigation">
+        <p class="nav-label">Workspace</p>
+        <button class="nav-item active" data-nav="dashboard" type="button"><span data-icon="dashboard"></span><span>Dashboard</span></button>
+        <button class="nav-item" data-nav="roadmap" type="button"><span data-icon="roadmap"></span><span>Study roadmap</span></button>
+        <button class="nav-item" data-nav="simulator" type="button"><span data-icon="lab"></span><span>System simulator</span><b>12</b></button>
+        <button class="nav-item" data-nav="questions" type="button"><span data-icon="questions"></span><span>Questions & answers</span></button>
+        <button class="nav-item" data-nav="walkthroughs" type="button"><span data-icon="steps"></span><span>Task walkthroughs</span></button>
+        <p class="nav-label">Progress</p>
+        <button class="nav-item" data-nav="landmarks" type="button"><span data-icon="landmark"></span><span>Learning landmarks</span></button>
+        <button class="nav-item" data-nav="checklist" type="button"><span data-icon="checklist"></span><span>Checklist</span></button>
+        <button class="nav-item" data-nav="notes" type="button"><span data-icon="notes"></span><span>My notes</span></button>
+        <button class="nav-item nav-mock" data-nav="mock" type="button"><span data-icon="timer"></span><span>3-hour mock</span></button>
+      </nav>
+
+      <div class="sidebar-card">
+        <span class="pulse-dot"></span>
+        <div>
+          <strong>System-based assessment</strong>
+          <small>180 minutes · English</small>
+        </div>
+      </div>
+
+      <p class="sidebar-foot">Unofficial study tool · Device-local data</p>
+    </aside>
+
+    <div class="app-column">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button mobile-only" id="menuButton" type="button" aria-label="Open navigation"><span data-icon="menu"></span></button>
+          <div>
+            <p class="breadcrumb" id="breadcrumb">Workspace / Dashboard</p>
+            <h1 id="pageTitle">Dashboard</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="timer-pill" id="timerPill" hidden>
+            <span class="pulse-dot"></span>
+            <span>Time left</span>
+            <strong id="globalTimer">03:00:00</strong>
+          </div>
+          <button class="icon-button" id="themeButton" type="button" aria-label="Toggle dark mode"><span data-icon="moon"></span></button>
+          <button class="profile-button" id="profileButton" type="button" aria-label="Open user profiles">
+            <span class="avatar" id="profileAvatar">G</span>
+            <span class="profile-copy"><strong id="profileName">Guest learner</strong><small>Device profile</small></span>
+            <span data-icon="chevron"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="page" id="page" tabindex="-1"></main>
+      <footer class="app-footer">
+        <span>Built for deliberate practice</span>
+        <strong>QuantumCupcakeCreation</strong>
+      </footer>
+    </div>
+  </div>
+
+  <div class="sidebar-scrim" id="sidebarScrim" hidden></div>
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+  <dialog class="app-dialog profile-dialog" id="profileDialog">
+    <form method="dialog" class="dialog-head">
+      <div>
+        <p class="eyebrow">Device profiles</p>
+        <h2>Choose your workspace</h2>
+      </div>
+      <button class="icon-button" value="cancel" aria-label="Close"><span data-icon="close"></span></button>
+    </form>
+    <p class="dialog-note">Profiles, progress, checklists, and notes are stored in this browser with IndexedDB. They are not cloud accounts.</p>
+    <div class="profile-list" id="profileList"></div>
+    <div class="dialog-divider"><span>Create a profile</span></div>
+    <form class="profile-create" id="profileCreateForm">
+      <label>
+        <span>Display name</span>
+        <input id="newProfileName" maxlength="40" required placeholder="Your name">
+      </label>
+      <label>
+        <span>Optional PIN</span>
+        <input id="newProfilePin" type="password" inputmode="numeric" maxlength="8" placeholder="4–8 digits">
+      </label>
+      <button class="button button-primary" type="submit">Create profile</button>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog pin-dialog" id="pinDialog">
+    <form method="dialog" class="dialog-head">
+      <div>
+        <p class="eyebrow">Protected profile</p>
+        <h2 id="pinTitle">Enter PIN</h2>
+      </div>
+      <button class="icon-button" value="cancel" aria-label="Close"><span data-icon="close"></span></button>
+    </form>
+    <form id="pinForm" class="pin-form">
+      <input id="pinProfileId" type="hidden">
+      <label>
+        <span>PIN</span>
+        <input id="profilePin" type="password" inputmode="numeric" maxlength="8" autofocus required>
+      </label>
+      <p class="form-error" id="pinError"></p>
+      <button class="button button-primary" type="submit">Open workspace</button>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog confirm-dialog" id="confirmDialog">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow">Please confirm</p>
+        <h2 id="confirmTitle">Continue?</h2>
+      </div>
+    </div>
+    <p id="confirmMessage"></p>
+    <div class="dialog-actions">
+      <button class="button button-secondary" id="confirmCancel" type="button">Cancel</button>
+      <button class="button button-danger" id="confirmAccept" type="button">Confirm</button>
+    </div>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
