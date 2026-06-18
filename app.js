@@ -11,6 +11,7 @@
     dashboard: ["Dashboard", "Workspace / Dashboard"],
     roadmap: ["Study roadmap", "Workspace / Study roadmap"],
     simulator: ["System simulator", "Workspace / System simulator"],
+    hana: ["HANA SyBA lab", "Workspace / HANA SyBA lab"],
     questions: ["Questions & answers", "Workspace / Questions & answers"],
     walkthroughs: ["Task walkthroughs", "Workspace / Task walkthroughs"],
     landmarks: ["Learning landmarks", "Progress / Learning landmarks"],
@@ -23,6 +24,7 @@
     dashboard: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4zm10 0h6v10h-6zM4 14h6v6H4zm10 4h6v2h-6z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
     roadmap: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3v18M6 6h9l-2 3 2 3H6m0 5h11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     lab: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 17l-5-9V3M7.5 14h9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    hana: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3Zm0 0v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     questions: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H7a3 3 0 0 0-3 3zm0 0V21m5-13h7m-7 4h5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     steps: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h14M3 6h.01M3 12h.01M3 18h.01" stroke-width="1.8" stroke-linecap="round"/></svg>',
     landmark: '<svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
@@ -291,6 +293,285 @@
     }
   ];
 
+  const hanaBuildTasks = [
+    {
+      id: "tenant",
+      build: "Build 1",
+      title: "Create a Tenant Database",
+      context: "SYSTEMDB",
+      tool: "SQL Console",
+      prompt: "Create tenant database TRAININGDB and leave it running.",
+      task: "Type the SQL command that creates TRAININGDB with SYSTEM user password Welcome@12345.",
+      expectedAnswer: 'CREATE DATABASE TRAININGDB SYSTEM USER PASSWORD "Welcome@12345";',
+      required: ["CREATE DATABASE TRAININGDB", "SYSTEM USER PASSWORD", "Welcome@12345"],
+      validation: ["TRAININGDB exists", "SYSTEM user password is set", "Final tenant status is running"],
+      hint: "Tenant lifecycle tasks are normally executed from SYSTEMDB."
+    },
+    {
+      id: "app-user",
+      build: "Build 2",
+      title: "Create APP_USER",
+      context: "TRAININGDB",
+      tool: "SQL Console",
+      prompt: "Create APP_USER and prevent first-login password change.",
+      task: "Type the SQL command that creates APP_USER with password Welcome@12345 and disables forced first password change.",
+      expectedAnswer: 'CREATE USER APP_USER PASSWORD "Welcome@12345" NO FORCE_FIRST_PASSWORD_CHANGE;',
+      required: ["CREATE USER APP_USER", "PASSWORD", "Welcome@12345", "NO FORCE_FIRST_PASSWORD_CHANGE"],
+      validation: ["APP_USER exists in TRAININGDB", "User is not deactivated", "Password change is not required"],
+      hint: "The NO FORCE_FIRST_PASSWORD_CHANGE clause is the usual missed part."
+    },
+    {
+      id: "app-privileges",
+      build: "Build 3",
+      title: "Assign APP_USER privileges",
+      context: "TRAININGDB",
+      tool: "SQL Console",
+      prompt: "Allow APP_USER to create objects and insert data when the task explicitly expects CREATE ANY.",
+      task: "Type the grant statement from the runbook.",
+      expectedAnswer: "GRANT CREATE ANY TO APP_USER;",
+      required: ["GRANT CREATE ANY TO APP_USER"],
+      validation: ["APP_USER has the requested privilege", "Privilege was granted in the tenant", "No unrelated user is granted"],
+      hint: "Only grant this if the task asks for it; least privilege still matters."
+    },
+    {
+      id: "customer-table",
+      build: "Build 4",
+      title: "Create CUSTOMER_MASTER",
+      context: "TRAININGDB as APP_USER",
+      tool: "SQL Console",
+      prompt: "Create CUSTOMER_MASTER with exactly four columns and the required data types.",
+      task: "Type the CREATE TABLE statement.",
+      expectedAnswer: `CREATE TABLE CUSTOMER_MASTER (
+    CUSTOMER_ID INTEGER,
+    CUSTOMER_NAME NVARCHAR(100),
+    CITY NVARCHAR(50),
+    STATUS NVARCHAR(20)
+);`,
+      required: ["CREATE TABLE CUSTOMER_MASTER", "CUSTOMER_ID INTEGER", "CUSTOMER_NAME NVARCHAR(100)", "CITY NVARCHAR(50)", "STATUS NVARCHAR(20)"],
+      validation: ["Table exists in APP_USER schema", "Column names match", "Data types and lengths match"],
+      hint: "Do not add extra columns or a primary key unless the task asks."
+    },
+    {
+      id: "customer-rows",
+      build: "Build 5",
+      title: "Insert CUSTOMER_MASTER rows",
+      context: "TRAININGDB as APP_USER",
+      tool: "SQL Console",
+      prompt: "Insert exactly the three required customer rows.",
+      task: "Type the three INSERT statements or one equivalent multi-row insert.",
+      expectedAnswer: `INSERT INTO CUSTOMER_MASTER (CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS) VALUES (1001, 'Alpha Ltd', 'London', 'Active');
+INSERT INTO CUSTOMER_MASTER (CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS) VALUES (1002, 'Beta Corp', 'Berlin', 'Active');
+INSERT INTO CUSTOMER_MASTER (CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS) VALUES (1003, 'Delta Inc', 'Paris', 'Inactive');`,
+      required: ["INSERT INTO CUSTOMER_MASTER", "1001", "Alpha Ltd", "London", "Active", "1002", "Beta Corp", "Berlin", "1003", "Delta Inc", "Paris", "Inactive"],
+      validation: ["Exactly three rows exist", "Values match case and spelling", "No test rows remain"],
+      hint: "The status values use Active and Inactive, not uppercase ACTIVE."
+    },
+    {
+      id: "active-view",
+      build: "Build 6",
+      title: "Create ACTIVE_CUSTOMERS_V",
+      context: "TRAININGDB as APP_USER",
+      tool: "SQL Console",
+      prompt: "Create a SQL view that returns only active customers.",
+      task: "Type the CREATE VIEW statement.",
+      expectedAnswer: `CREATE VIEW ACTIVE_CUSTOMERS_V AS
+SELECT CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS
+FROM CUSTOMER_MASTER
+WHERE STATUS = 'Active';`,
+      required: ["CREATE VIEW ACTIVE_CUSTOMERS_V", "FROM CUSTOMER_MASTER", "WHERE STATUS = 'Active'"],
+      validation: ["View exists in APP_USER schema", "Only status Active is returned", "Rows 1001 and 1002 are visible"],
+      hint: "The filter value is case-sensitive in the practice data."
+    },
+    {
+      id: "report-user",
+      build: "Build 7",
+      title: "Create restricted REPORT_USER",
+      context: "TRAININGDB",
+      tool: "SQL Console",
+      prompt: "Create REPORT_USER with read-only access only to APP_USER.ACTIVE_CUSTOMERS_V.",
+      task: "Type the restricted user creation and SELECT grant.",
+      expectedAnswer: `CREATE RESTRICTED USER REPORT_USER PASSWORD "Welcome@12345" NO FORCE_FIRST_PASSWORD_CHANGE;
+GRANT SELECT ON APP_USER.ACTIVE_CUSTOMERS_V TO REPORT_USER;`,
+      required: ["CREATE RESTRICTED USER REPORT_USER", "Welcome@12345", "NO FORCE_FIRST_PASSWORD_CHANGE", "GRANT SELECT ON APP_USER.ACTIVE_CUSTOMERS_V TO REPORT_USER"],
+      avoid: ["CUSTOMER_MASTER TO REPORT_USER", "CREATE USER REPORT_USER"],
+      validation: ["REPORT_USER is restricted", "SELECT granted only on the view", "User cannot modify data"],
+      hint: "Granting table access when only the view is required is a grading risk."
+    },
+    {
+      id: "backup",
+      build: "Build 8",
+      title: "Configure complete data backup",
+      context: "SYSTEMDB or cockpit backup tile",
+      tool: "SQL Console / Cockpit",
+      prompt: "Run a complete backup of TRAININGDB using prefix TRAININGDB_FULL_BACKUP.",
+      task: "Type the SQL backup command from SYSTEMDB.",
+      expectedAnswer: "BACKUP DATA FOR TRAININGDB USING FILE ('TRAININGDB_FULL_BACKUP');",
+      required: ["BACKUP DATA FOR TRAININGDB", "TRAININGDB_FULL_BACKUP"],
+      validation: ["Backup targets TRAININGDB", "Prefix matches exactly", "Backup completes before submission"],
+      hint: "Backing up SYSTEMDB with the correct-looking prefix would still be wrong."
+    },
+    {
+      id: "backup-status",
+      build: "Build 9",
+      title: "Check backup status",
+      context: "Backup catalog",
+      tool: "SQL Console / Cockpit",
+      prompt: "Verify that the latest backup with the required prefix completed successfully.",
+      task: "Type the catalog query that searches for TRAININGDB_FULL_BACKUP.",
+      expectedAnswer: `SELECT ENTRY_ID, ENTRY_TYPE_NAME, STATE_NAME, SYS_START_TIME, SYS_END_TIME
+FROM SYS.M_BACKUP_CATALOG
+WHERE DESTINATION_PATH LIKE '%TRAININGDB_FULL_BACKUP%'
+ORDER BY SYS_START_TIME DESC;`,
+      required: ["SYS.M_BACKUP_CATALOG", "DESTINATION_PATH LIKE", "TRAININGDB_FULL_BACKUP", "ORDER BY SYS_START_TIME DESC"],
+      validation: ["Catalog query uses backup prefix", "Latest entry is checked", "State is successful or completed"],
+      hint: "Do not rely only on a transient UI success message."
+    },
+    {
+      id: "cockpit-resource",
+      build: "Build 10",
+      title: "Create a cockpit resource",
+      context: "SAP HANA cockpit",
+      tool: "Cockpit UI",
+      prompt: "Register the database system as HANA_TRAINING_RESOURCE.",
+      task: "Type the resource name you must see as available in cockpit.",
+      expectedAnswer: "HANA_TRAINING_RESOURCE",
+      required: ["HANA_TRAINING_RESOURCE"],
+      validation: ["Resource name matches exactly", "Resource points to the correct system", "Resource status is available"],
+      hint: "This is a UI task; the simulator accepts the exact evidence value."
+    },
+    {
+      id: "services",
+      build: "Build 11",
+      title: "Monitor database services",
+      context: "Cockpit monitoring or SQL",
+      tool: "SQL Console / Cockpit",
+      prompt: "Verify that required HANA services are visible and running where applicable.",
+      task: "Type the service monitoring query.",
+      expectedAnswer: `SELECT DATABASE_NAME, HOST, SERVICE_NAME, ACTIVE_STATUS, SQL_PORT
+FROM SYS.M_SERVICES
+ORDER BY DATABASE_NAME, SERVICE_NAME;`,
+      required: ["SYS.M_SERVICES", "DATABASE_NAME", "SERVICE_NAME", "ACTIVE_STATUS", "ORDER BY DATABASE_NAME, SERVICE_NAME"],
+      validation: ["nameserver is checked", "indexserver is checked", "Optional services are treated by version"],
+      hint: "xsengine can be optional depending on the HANA version."
+    },
+    {
+      id: "parameter",
+      build: "Build 12",
+      title: "Change a database parameter",
+      context: "Correct layer and scope",
+      tool: "SQL Console / Cockpit",
+      prompt: "Change global_allocation_limit in global.ini at the required scope.",
+      task: "Type the parameter-change template from the runbook using <VALUE_FROM_TASK>.",
+      expectedAnswer: `ALTER SYSTEM ALTER CONFIGURATION ('global.ini', 'SYSTEM')
+SET ('memorymanager', 'global_allocation_limit') = '<VALUE_FROM_TASK>'
+WITH RECONFIGURE;`,
+      required: ["ALTER SYSTEM ALTER CONFIGURATION", "global.ini", "SYSTEM", "memorymanager", "global_allocation_limit", "WITH RECONFIGURE"],
+      validation: ["File is global.ini", "Section is memorymanager", "Key is global_allocation_limit", "Layer/scope matches the task"],
+      hint: "The value alone is not enough; layer and section are common validation points."
+    },
+    {
+      id: "restart-tenant",
+      build: "Build 13",
+      title: "Stop and start TRAININGDB",
+      context: "SYSTEMDB or cockpit administration",
+      tool: "SQL Console / Cockpit",
+      prompt: "Stop TRAININGDB, verify it stopped, start it again, and leave it running.",
+      task: "Type the two lifecycle commands in the correct order.",
+      expectedAnswer: `ALTER SYSTEM STOP DATABASE TRAININGDB;
+ALTER SYSTEM START DATABASE TRAININGDB;`,
+      required: ["ALTER SYSTEM STOP DATABASE TRAININGDB", "ALTER SYSTEM START DATABASE TRAININGDB"],
+      validation: ["Tenant is stopped first", "Tenant is started again", "Final status is running"],
+      hint: "The final state matters; do not leave the tenant stopped."
+    },
+    {
+      id: "audit-policy",
+      build: "Build 14",
+      title: "Create audit policy",
+      context: "TRAININGDB with audit privileges",
+      tool: "SQL Console / Cockpit",
+      prompt: "Create AUDIT_APP_USER_LOGIN for successful and unsuccessful APP_USER logins.",
+      task: "Type the CREATE AUDIT POLICY statement.",
+      expectedAnswer: `CREATE AUDIT POLICY AUDIT_APP_USER_LOGIN
+AUDITING SUCCESSFUL CONNECT, UNSUCCESSFUL CONNECT
+USER APP_USER
+LEVEL INFO;`,
+      required: ["CREATE AUDIT POLICY AUDIT_APP_USER_LOGIN", "SUCCESSFUL CONNECT", "UNSUCCESSFUL CONNECT", "USER APP_USER", "LEVEL INFO"],
+      validation: ["Policy name matches", "Both successful and unsuccessful connects are audited", "Target user is APP_USER"],
+      hint: "Auditing only successful logins is incomplete."
+    },
+    {
+      id: "final-validation",
+      build: "Build 15",
+      title: "Validate final configuration",
+      context: "SYSTEMDB and TRAININGDB",
+      tool: "SQL Console / Cockpit",
+      prompt: "Confirm every required object and final operational status before submission.",
+      task: "Type the essential validation checks you would run. Include database, users, table, view, data, privileges, backup, services, and audit policy.",
+      expectedAnswer: `SELECT DATABASE_NAME, ACTIVE_STATUS FROM SYS.M_DATABASES WHERE DATABASE_NAME = 'TRAININGDB';
+SELECT USER_NAME FROM SYS.USERS WHERE USER_NAME IN ('APP_USER', 'REPORT_USER') ORDER BY USER_NAME;
+SELECT SCHEMA_NAME, TABLE_NAME FROM SYS.TABLES WHERE SCHEMA_NAME = 'APP_USER' AND TABLE_NAME = 'CUSTOMER_MASTER';
+SELECT SCHEMA_NAME, VIEW_NAME FROM SYS.VIEWS WHERE SCHEMA_NAME = 'APP_USER' AND VIEW_NAME = 'ACTIVE_CUSTOMERS_V';
+SELECT * FROM APP_USER.CUSTOMER_MASTER ORDER BY CUSTOMER_ID;
+SELECT * FROM APP_USER.ACTIVE_CUSTOMERS_V ORDER BY CUSTOMER_ID;
+SELECT * FROM SYS.GRANTED_PRIVILEGES WHERE GRANTEE IN ('APP_USER', 'REPORT_USER') ORDER BY GRANTEE;
+SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
+      required: ["SYS.M_DATABASES", "TRAININGDB", "SYS.USERS", "APP_USER", "REPORT_USER", "SYS.TABLES", "CUSTOMER_MASTER", "SYS.VIEWS", "ACTIVE_CUSTOMERS_V", "APP_USER.CUSTOMER_MASTER", "APP_USER.ACTIVE_CUSTOMERS_V", "SYS.GRANTED_PRIVILEGES", "SYS.AUDIT_POLICIES", "AUDIT_APP_USER_LOGIN"],
+      validation: ["Every object exists with exact name", "Data rows match", "Privileges are least-privilege", "Backup and service evidence is checked"],
+      hint: "The final check should cover both SQL objects and administrative evidence."
+    }
+  ];
+
+  const hanaQaItems = [
+    {
+      id: "hana-qa-1",
+      question: "Which database context is normally used to create, stop, start, or back up a tenant database?",
+      answer: "SYSTEMDB",
+      required: ["SYSTEMDB"]
+    },
+    {
+      id: "hana-qa-2",
+      question: "What exact tenant database name does this runbook use?",
+      answer: "TRAININGDB",
+      required: ["TRAININGDB"]
+    },
+    {
+      id: "hana-qa-3",
+      question: "Which schema should own CUSTOMER_MASTER when APP_USER creates it?",
+      answer: "APP_USER",
+      required: ["APP_USER"]
+    },
+    {
+      id: "hana-qa-4",
+      question: "What should ACTIVE_CUSTOMERS_V filter on?",
+      answer: "STATUS = 'Active'",
+      required: ["STATUS", "Active"]
+    },
+    {
+      id: "hana-qa-5",
+      question: "Which user should be restricted and read only from the active customers view?",
+      answer: "REPORT_USER",
+      required: ["REPORT_USER"]
+    },
+    {
+      id: "hana-qa-6",
+      question: "What is the required backup prefix?",
+      answer: "TRAININGDB_FULL_BACKUP",
+      required: ["TRAININGDB_FULL_BACKUP"]
+    },
+    {
+      id: "hana-qa-7",
+      question: "What is the exact cockpit resource name?",
+      answer: "HANA_TRAINING_RESOURCE",
+      required: ["HANA_TRAINING_RESOURCE"]
+    },
+    {
+      id: "hana-qa-8",
+      question: "After stop/start tasks, what final tenant status should remain before submission?",
+      answer: "Running or active",
+      required: ["RUNNING|ACTIVE"]
+    }
+  ];
+
   const qaItems = [
     ["Cloud Integration", "What is the difference between a message header and an exchange property?", "A header travels with the message and is commonly used by adapters and routing. An exchange property is internal to the exchange and is useful for values that should not be sent to a receiver."],
     ["Cloud Integration", "When should you use a Content Modifier?", "Use it to create or change the body, headers, and exchange properties without writing custom code."],
@@ -519,6 +800,7 @@
   let notes = [];
   let currentRoute = "dashboard";
   let currentChallenge = 0;
+  let currentHanaTask = 0;
   let qaFilter = "All";
   let qaSearch = "";
   let noteSearch = "";
@@ -533,6 +815,11 @@
       simAnswers: {},
       simPassed: {},
       simFeedback: {},
+      hanaAnswers: {},
+      hanaPassed: {},
+      hanaFeedback: {},
+      hanaQaAnswers: {},
+      hanaQaFeedback: {},
       qaReviewed: {},
       walkSteps: {},
       landmarks: {},
@@ -638,7 +925,8 @@
     activeProfile.lastLogin = Date.now();
     await dbPut("profiles", activeProfile);
     localStorage.setItem(ACTIVE_PROFILE_KEY, profile.id);
-    userState = await dbGet("userStates", profile.id) || defaultUserState(profile.id);
+    const savedState = await dbGet("userStates", profile.id);
+    userState = savedState ? mergeStateDefaults(defaultUserState(profile.id), savedState) : defaultUserState(profile.id);
     notes = (await dbGetAll("notes"))
       .filter((note) => note.userId === profile.id)
       .sort((a, b) => b.updatedAt - a.updatedAt);
@@ -690,6 +978,7 @@
   function progressStats() {
     const roadmap = percent(Object.values(userState.roadmap).filter(Boolean).length, roadmapDays.length);
     const simulator = percent(Object.values(userState.simPassed).filter(Boolean).length, systemChallenges.length);
+    const hana = percent(Object.values(userState.hanaPassed || {}).filter(Boolean).length, hanaBuildTasks.length);
     const qa = percent(Object.keys(userState.qaReviewed).length, qaItems.length);
     const totalSteps = walkthroughs.reduce((sum, item) => sum + item.steps.length, 0);
     const walkthrough = percent(Object.values(userState.walkSteps).filter(Boolean).length, totalSteps);
@@ -698,18 +987,37 @@
     const checklist = percent(allChecks.filter((item) => userState.checklist[item.id]).length, allChecks.length);
     const readiness = Math.round(
       roadmap * 0.15 +
-      simulator * 0.35 +
+      simulator * 0.30 +
+      hana * 0.10 +
       qa * 0.10 +
-      walkthrough * 0.15 +
+      walkthrough * 0.10 +
       landmark * 0.15 +
       checklist * 0.10
     );
-    return { roadmap, simulator, qa, walkthrough, landmark, checklist, readiness };
+    return { roadmap, simulator, hana, qa, walkthrough, landmark, checklist, readiness };
   }
 
   function nextChallengeIndex() {
     const index = systemChallenges.findIndex((challenge) => !userState.simPassed[challenge.id]);
     return index === -1 ? 0 : index;
+  }
+
+  function mergeStateDefaults(target, source) {
+    Object.keys(source || {}).forEach((key) => {
+      if (
+        source[key] &&
+        typeof source[key] === "object" &&
+        !Array.isArray(source[key]) &&
+        target[key] &&
+        typeof target[key] === "object" &&
+        !Array.isArray(target[key])
+      ) {
+        mergeStateDefaults(target[key], source[key]);
+      } else {
+        target[key] = source[key];
+      }
+    });
+    return target;
   }
 
   function updateProfileUI() {
@@ -748,8 +1056,9 @@
     const renderers = {
       dashboard: renderDashboard,
       roadmap: renderRoadmap,
-      simulator: renderSimulator,
-      questions: renderQuestions,
+    simulator: renderSimulator,
+    hana: renderHanaLab,
+    questions: renderQuestions,
       walkthroughs: renderWalkthroughs,
       landmarks: renderLandmarks,
       checklist: renderChecklist,
@@ -816,6 +1125,7 @@
       <section class="metric-grid">
         ${metricCard("roadmap", `${Object.values(userState.roadmap).filter(Boolean).length}/${roadmapDays.length}`, "Roadmap days complete")}
         ${metricCard("lab", `${Object.values(userState.simPassed).filter(Boolean).length}/${systemChallenges.length}`, "System tasks passed")}
+        ${metricCard("hana", `${Object.values(userState.hanaPassed || {}).filter(Boolean).length}/${hanaBuildTasks.length}`, "HANA SyBA builds checked")}
         ${metricCard("questions", `${Object.keys(userState.qaReviewed).length}/${qaItems.length}`, "Answers reviewed")}
         ${metricCard("notes", String(notes.length), "Personal notes")}
       </section>
@@ -838,6 +1148,7 @@
             <div class="progress-list" style="margin-top:20px">
               ${progressLine("Study roadmap", stats.roadmap)}
               ${progressLine("System simulator", stats.simulator)}
+              ${progressLine("HANA SyBA lab", stats.hana)}
               ${progressLine("Task walkthroughs", stats.walkthrough)}
               ${progressLine("Learning landmarks", stats.landmark)}
             </div>
@@ -858,6 +1169,7 @@
         </div>
         <div class="feature-grid">
           ${featureCard("lab", "System simulator", "Twelve original, exam-aligned scenarios for Cloud Integration, API Management, Event Mesh, monitoring, and architecture.", "simulator")}
+          ${featureCard("hana", "HANA SyBA lab", "The uploaded runbook becomes a virtual HANA cockpit and SQL-console sandbox with typed-answer validation.", "hana")}
           ${featureCard("steps", "Step-by-step tasks", "Check off every action in eight practical walkthroughs and keep the exact workflow fresh.", "walkthroughs")}
           ${featureCard("notes", "Personal knowledge base", "Write, search, edit, and export notes that remain separate for each device profile.", "notes")}
         </div>
@@ -1077,6 +1389,211 @@
     return Object.keys(expected).every((key) => {
       return String(answer?.[key] ?? "").trim().toLowerCase() === String(expected[key]).trim().toLowerCase();
     });
+  }
+
+  function normalizeTypedAnswer(value) {
+    return String(value || "")
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+  }
+
+  function requirementMatches(answer, requirement) {
+    const normalized = normalizeTypedAnswer(answer);
+    return String(requirement)
+      .split("|")
+      .some((option) => normalized.includes(normalizeTypedAnswer(option)));
+  }
+
+  function evaluateHanaTask(task, answer) {
+    const missing = task.required.filter((requirement) => !requirementMatches(answer, requirement));
+    const forbidden = (task.avoid || []).filter((requirement) => requirementMatches(answer, requirement));
+    return {
+      pass: missing.length === 0 && forbidden.length === 0,
+      missing,
+      forbidden
+    };
+  }
+
+  function evaluateHanaQa(item, answer) {
+    const missing = item.required.filter((requirement) => !requirementMatches(answer, requirement));
+    return { pass: missing.length === 0, missing };
+  }
+
+  function hanaBuildState() {
+    const passed = userState.hanaPassed || {};
+    return {
+      tenant: passed.tenant ? "Running" : "Not built",
+      appUser: passed["app-user"] ? "Created" : "Missing",
+      customerTable: passed["customer-table"] ? "Ready" : "Missing",
+      activeView: passed["active-view"] ? "Ready" : "Missing",
+      reportUser: passed["report-user"] ? "Restricted" : "Missing",
+      backup: passed.backup && passed["backup-status"] ? "Verified" : "Pending",
+      cockpit: passed["cockpit-resource"] ? "Available" : "Unregistered",
+      audit: passed["audit-policy"] ? "Enabled" : "Missing"
+    };
+  }
+
+  function nextHanaTaskIndex() {
+    const index = hanaBuildTasks.findIndex((task) => !userState.hanaPassed?.[task.id]);
+    return index === -1 ? 0 : index;
+  }
+
+  function renderHanaLab() {
+    if (currentHanaTask >= hanaBuildTasks.length) currentHanaTask = 0;
+    const task = hanaBuildTasks[currentHanaTask];
+    const passedCount = Object.values(userState.hanaPassed || {}).filter(Boolean).length;
+    const qaPassed = Object.values(userState.hanaQaFeedback || {}).filter((item) => item?.pass).length;
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Uploaded runbook sandbox</p>
+          <h2>SAP HANA SyBA virtual build lab</h2>
+          <p>Practice the PDF runbook in an embedded assessment-style environment. Type SQL or cockpit evidence, run validation, see whether the build is correct, then reveal the expected answer.</p>
+        </div>
+        <div class="heading-actions">
+          <span class="tag green">${passedCount}/${hanaBuildTasks.length} builds correct</span>
+          <a class="button button-secondary" href="./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf" target="_blank" rel="noreferrer">Open PDF</a>
+        </div>
+      </div>
+
+      <section class="hana-hero panel">
+        <div>
+          <p class="eyebrow">Virtual environment</p>
+          <h3>HANA cockpit + Database Explorer simulator</h3>
+          <p>This is a safe browser sandbox. It validates typed commands and evidence against the runbook, but it does not connect to a real SAP HANA system.</p>
+        </div>
+        <div class="hana-score-card">
+          <strong>${Math.round((passedCount / hanaBuildTasks.length) * 100)}%</strong>
+          <span>Runbook build score</span>
+        </div>
+      </section>
+
+      <div class="hana-layout">
+        <aside class="challenge-list">
+          ${hanaBuildTasks.map((item, index) => `
+            <button class="challenge-button ${index === currentHanaTask ? "active" : ""} ${userState.hanaPassed?.[item.id] ? "passed" : ""}" data-hana-task="${index}" type="button">
+              <span class="challenge-index">${userState.hanaPassed?.[item.id] ? "✓" : String(index + 1).padStart(2, "0")}</span>
+              <span><strong>${esc(item.title)}</strong><small>${esc(item.context)} · ${esc(item.tool)}</small></span>
+              <span class="challenge-status">${userState.hanaPassed?.[item.id] ? "●" : ""}</span>
+            </button>
+          `).join("")}
+        </aside>
+        <section class="hana-workbench">
+          ${hanaTaskWorkspace(task)}
+        </section>
+      </div>
+
+      <section class="hana-lower-grid">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Typed runbook questions</h3><p>${qaPassed}/${hanaQaItems.length} concept answers correct</p></div><span class="tag">${qaPassed}/${hanaQaItems.length}</span></div>
+          <div class="hana-qa-list">
+            ${hanaQaItems.map((item, index) => hanaQaCard(item, index)).join("")}
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Embedded runbook PDF</h3><p>Reference copy from your uploaded file</p></div></div>
+          <div class="pdf-frame-wrap">
+            <iframe title="SAP HANA SyBA Practice Build Runbook" src="./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf"></iframe>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function hanaTaskWorkspace(task) {
+    const answer = userState.hanaAnswers?.[task.id] || "";
+    const feedback = userState.hanaFeedback?.[task.id];
+    const state = hanaBuildState();
+    return `
+      <header class="sim-brief hana-brief">
+        <div class="sim-status"><span class="pulse-dot"></span>${esc(task.build)} · ${esc(task.context)}</div>
+        <h2>${esc(task.title)}</h2>
+        <p>${esc(task.prompt)}</p>
+      </header>
+      <div class="hana-env">
+        <div class="hana-window">
+          <div class="hana-window-bar"><span>Task document</span><strong>${esc(task.build)}</strong></div>
+          <div class="hana-window-body">
+            <p class="eyebrow">Objective</p>
+            <p>${esc(task.task)}</p>
+            <div class="callout"><strong>Hint:</strong> ${esc(task.hint)}</div>
+          </div>
+        </div>
+        <div class="hana-window">
+          <div class="hana-window-bar"><span>Virtual cockpit</span><strong>Lab state</strong></div>
+          <div class="hana-window-body hana-state-grid">
+            ${hanaStateRow("TRAININGDB", state.tenant)}
+            ${hanaStateRow("APP_USER", state.appUser)}
+            ${hanaStateRow("CUSTOMER_MASTER", state.customerTable)}
+            ${hanaStateRow("ACTIVE_CUSTOMERS_V", state.activeView)}
+            ${hanaStateRow("REPORT_USER", state.reportUser)}
+            ${hanaStateRow("Backup", state.backup)}
+            ${hanaStateRow("Cockpit resource", state.cockpit)}
+            ${hanaStateRow("Audit policy", state.audit)}
+          </div>
+        </div>
+        <div class="hana-window hana-console-window">
+          <div class="hana-window-bar"><span>Database Explorer / SQL Console</span><strong>${esc(task.tool)}</strong></div>
+          <div class="hana-window-body">
+            <textarea class="hana-console-input" data-hana-answer="${esc(task.id)}" spellcheck="false" placeholder="Type your SQL command or cockpit evidence here...">${esc(answer)}</textarea>
+            <div class="form-actions">
+              <div class="challenge-nav">
+                <button class="button button-soft button-small" data-hana-prev type="button" ${currentHanaTask === 0 ? "disabled" : ""}>Previous</button>
+                <button class="button button-soft button-small" data-hana-next type="button" ${currentHanaTask === hanaBuildTasks.length - 1 ? "disabled" : ""}>Next</button>
+              </div>
+              <div class="challenge-nav">
+                <button class="button button-secondary button-small" data-reset-hana-answer="${esc(task.id)}" type="button">Clear answer</button>
+                <button class="button button-primary" data-check-hana="${esc(task.id)}" type="button">Validate build</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      ${feedback ? hanaFeedbackBlock(task, feedback) : '<div class="hint-box">Type an answer and choose Validate build. The correct answer appears after each check.</div>'}
+    `;
+  }
+
+  function hanaStateRow(label, value) {
+    const positive = !/missing|pending|not built|unregistered/i.test(value);
+    return `<div class="summary-stat"><span>${esc(label)}</span><strong style="color:${positive ? "var(--green)" : "var(--muted)"}">${esc(value)}</strong></div>`;
+  }
+
+  function hanaFeedbackBlock(task, feedback) {
+    const missing = feedback.missing?.length ? `<p><strong>Missing:</strong> ${feedback.missing.map(esc).join(", ")}</p>` : "";
+    const forbidden = feedback.forbidden?.length ? `<p><strong>Remove:</strong> ${feedback.forbidden.map(esc).join(", ")}</p>` : "";
+    return `
+      <div class="feedback ${feedback.pass ? "success" : "error"}">
+        <strong>${feedback.pass ? "Build correct" : "Build needs repair"}</strong>
+        <p>${esc(feedback.message)}</p>
+        ${missing}
+        ${forbidden}
+      </div>
+      <div class="answer-panel hana-answer-panel">
+        <strong>Correct answer / expected evidence</strong>
+        <pre>${esc(task.expectedAnswer)}</pre>
+        <strong>Validation checks</strong>
+        <ul>${task.validation.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      </div>
+    `;
+  }
+
+  function hanaQaCard(item, index) {
+    const answer = userState.hanaQaAnswers?.[item.id] || "";
+    const feedback = userState.hanaQaFeedback?.[item.id];
+    return `
+      <article class="hana-qa-card ${feedback?.pass ? "passed" : ""}">
+        <div class="card-kicker"><span class="tag">Q${index + 1}</span><span class="tag ${feedback?.pass ? "green" : ""}">${feedback ? (feedback.pass ? "Correct" : "Review") : "Unanswered"}</span></div>
+        <h3>${esc(item.question)}</h3>
+        <textarea data-hana-qa="${esc(item.id)}" placeholder="Type your answer...">${esc(answer)}</textarea>
+        <div class="card-actions">
+          <button class="button button-primary button-small" data-check-hana-qa="${esc(item.id)}" type="button">Check typed answer</button>
+        </div>
+        ${feedback ? `<div class="feedback ${feedback.pass ? "success" : "error"}"><strong>${feedback.pass ? "Typed answer is correct." : "Typed answer is not quite correct."}</strong><p>Correct answer: ${esc(item.answer)}</p></div>` : ""}
+      </article>
+    `;
   }
 
   function renderQuestions() {
@@ -1617,6 +2134,68 @@
       return;
     }
 
+    const hanaTaskButton = event.target.closest("[data-hana-task]");
+    if (hanaTaskButton) {
+      currentHanaTask = Number(hanaTaskButton.dataset.hanaTask);
+      renderRoute();
+      return;
+    }
+
+    if (event.target.closest("[data-hana-prev]")) {
+      currentHanaTask = Math.max(0, currentHanaTask - 1);
+      renderRoute();
+      return;
+    }
+
+    if (event.target.closest("[data-hana-next]")) {
+      currentHanaTask = Math.min(hanaBuildTasks.length - 1, currentHanaTask + 1);
+      renderRoute();
+      return;
+    }
+
+    const resetHana = event.target.closest("[data-reset-hana-answer]");
+    if (resetHana) {
+      const id = resetHana.dataset.resetHanaAnswer;
+      delete userState.hanaAnswers[id];
+      delete userState.hanaFeedback[id];
+      delete userState.hanaPassed[id];
+      await saveUserState();
+      renderRoute();
+      return;
+    }
+
+    const checkHana = event.target.closest("[data-check-hana]");
+    if (checkHana) {
+      const task = hanaBuildTasks.find((item) => item.id === checkHana.dataset.checkHana);
+      if (!task) return;
+      const result = evaluateHanaTask(task, userState.hanaAnswers[task.id] || "");
+      userState.hanaPassed[task.id] = result.pass;
+      userState.hanaFeedback[task.id] = {
+        ...result,
+        message: result.pass
+          ? "The typed answer matches the runbook validation pattern."
+          : "The typed answer is missing required HANA build details or includes an unsafe extra grant/object."
+      };
+      if (result.pass) logActivity(`Validated HANA build: ${task.title}`);
+      await saveUserState();
+      showToast(result.pass ? "HANA build marked correct." : "HANA build needs repair.", result.pass ? "success" : "error");
+      renderRoute();
+      return;
+    }
+
+    const checkHanaQa = event.target.closest("[data-check-hana-qa]");
+    if (checkHanaQa) {
+      const item = hanaQaItems.find((entry) => entry.id === checkHanaQa.dataset.checkHanaQa);
+      if (!item) return;
+      const result = evaluateHanaQa(item, userState.hanaQaAnswers[item.id] || "");
+      userState.hanaQaFeedback[item.id] = result;
+      if (result.pass) logActivity(`Answered HANA question: ${item.question}`);
+      await saveUserState();
+      showToast(result.pass ? "Typed answer correct." : "Typed answer needs review.", result.pass ? "success" : "error");
+      renderRoute();
+      return;
+    }
+
     const qaFilterButton = event.target.closest("[data-qa-filter]");
     if (qaFilterButton) {
       qaFilter = qaFilterButton.dataset.qaFilter;
@@ -1897,6 +2476,20 @@
         userState.mock.answers[challenge.id] = {};
       }
       userState.mock.answers[challenge.id][mockField] = event.target.value;
+      await saveUserState();
+      return;
+    }
+
+    const hanaAnswer = event.target.dataset.hanaAnswer;
+    if (hanaAnswer !== undefined) {
+      userState.hanaAnswers[hanaAnswer] = event.target.value;
+      await saveUserState();
+      return;
+    }
+
+    const hanaQa = event.target.dataset.hanaQa;
+    if (hanaQa !== undefined) {
+      userState.hanaQaAnswers[hanaQa] = event.target.value;
       await saveUserState();
     }
   }

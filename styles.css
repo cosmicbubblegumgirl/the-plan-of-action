@@ -1511,6 +1511,216 @@ svg {
   white-space: pre-wrap;
 }
 
+.hana-hero {
+  margin-bottom: 18px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 22px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--cyan) 20%, transparent), transparent 18rem),
+    var(--surface);
+}
+
+.hana-hero h3 {
+  font-size: 1.25rem;
+}
+
+.hana-hero p {
+  margin-bottom: 0;
+}
+
+.hana-score-card {
+  min-height: 120px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  background: var(--primary-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--line));
+  border-radius: 16px;
+}
+
+.hana-score-card strong {
+  color: var(--primary);
+  font-size: 2rem;
+}
+
+.hana-score-card span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hana-layout {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.hana-workbench {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.hana-brief {
+  background:
+    radial-gradient(circle at 95% 0%, rgba(34, 189, 202, 0.14), transparent 18rem),
+    linear-gradient(135deg, #102f50, #143b5c);
+}
+
+.hana-env {
+  padding: 18px;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(260px, 0.9fr);
+  gap: 14px;
+}
+
+.hana-console-window {
+  grid-column: 1 / -1;
+}
+
+.hana-window {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.hana-window-bar {
+  min-height: 39px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink-soft);
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hana-window-bar strong {
+  color: var(--primary);
+  font-size: 0.65rem;
+}
+
+.hana-window-body {
+  padding: 15px;
+}
+
+.hana-window-body p:last-child {
+  margin-bottom: 0;
+}
+
+.hana-state-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.hana-state-grid .summary-stat {
+  padding: 10px 11px;
+}
+
+.hana-console-input {
+  width: 100%;
+  min-height: 220px;
+  padding: 15px;
+  color: #d5e7f2;
+  background: #0d1e2e;
+  border: 1px solid #31516b;
+  border-radius: 8px;
+  font: 0.8rem/1.55 "Cascadia Mono", "Consolas", monospace;
+  resize: vertical;
+}
+
+.hana-answer-panel {
+  margin: 14px 18px 18px;
+}
+
+.hana-answer-panel pre {
+  margin: 10px 0 14px;
+  padding: 13px;
+  overflow-x: auto;
+  color: #d5e7f2;
+  background: #0d1e2e;
+  border-radius: 7px;
+  font: 0.72rem/1.55 "Cascadia Mono", "Consolas", monospace;
+  white-space: pre-wrap;
+}
+
+.hana-answer-panel ul {
+  margin: 9px 0 0;
+  padding-left: 19px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.hana-lower-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  gap: 16px;
+}
+
+.hana-qa-list {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.hana-qa-card {
+  padding: 15px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.hana-qa-card.passed {
+  border-color: color-mix(in srgb, var(--green) 40%, var(--line));
+}
+
+.hana-qa-card h3 {
+  margin: 12px 0 10px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.hana-qa-card textarea {
+  width: 100%;
+  min-height: 74px;
+  padding: 10px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  resize: vertical;
+}
+
+.pdf-frame-wrap {
+  height: 640px;
+  padding: 14px;
+}
+
+.pdf-frame-wrap iframe {
+  width: 100%;
+  height: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
 .mapping-table {
   width: 100%;
   border-collapse: collapse;
@@ -2535,7 +2745,9 @@ svg {
   }
 
   .simulator-layout,
-  .mock-active {
+  .mock-active,
+  .hana-layout,
+  .hana-lower-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2546,6 +2758,14 @@ svg {
 
   .challenge-button {
     min-width: 235px;
+  }
+
+  .hana-env {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-frame-wrap {
+    height: 520px;
   }
 }
 
@@ -2636,9 +2856,18 @@ svg {
     justify-self: start;
   }
 
+  .hana-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hana-score-card {
+    min-height: 95px;
+  }
+
   .sim-content,
   .sim-brief,
-  .tenant-page {
+  .tenant-page,
+  .hana-env {
     padding: 17px;
   }
 

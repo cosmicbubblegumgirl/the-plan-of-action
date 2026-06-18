@@ -1,5 +1,13 @@
-const CACHE = "plan-of-action-v1";
-const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./icon.svg", "./manifest.webmanifest"];
+const CACHE = "plan-of-action-v2";
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./icon.svg",
+  "./manifest.webmanifest",
+  "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
