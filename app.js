@@ -1574,10 +1574,11 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
   function hanaFeedbackBlock(task, feedback) {
     const missing = feedback.missing?.length ? `<p><strong>Missing:</strong> ${feedback.missing.map(esc).join(", ")}</p>` : "";
     const forbidden = feedback.forbidden?.length ? `<p><strong>Remove:</strong> ${feedback.forbidden.map(esc).join(", ")}</p>` : "";
+    const message = feedback.pass ? HANA_FEEDBACK_COPY.pass : HANA_FEEDBACK_COPY.fail;
     return `
       <div class="feedback ${feedback.pass ? "success" : "error"}">
         <strong>${feedback.pass ? "Build correct" : "Build needs repair"}</strong>
-        <p>${esc(feedback.message)}</p>
+        <p>${esc(message)}</p>
         ${missing}
         ${forbidden}
       </div>
