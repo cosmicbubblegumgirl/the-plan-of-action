@@ -1,4 +1,4 @@
-const CACHE = "plan-of-action-v5";
+const CACHE = "plan-of-action-v6";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,7 +10,16 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => {
+      return Promise.all(
+        ASSETS.map(async (asset) => {
+          const response = await fetch(new Request(asset, { cache: "reload" }));
+          if (response.ok) await cache.put(asset, response);
+        })
+      );
+    })
+  );
   self.skipWaiting();
 });
 
@@ -25,7 +34,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    fetch(event.request)
+    fetch(new Request(event.request, { cache: "reload" }))
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(event.request, copy));
