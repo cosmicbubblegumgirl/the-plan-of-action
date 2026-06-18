@@ -1,4 +1,4 @@
-const CACHE = "plan-of-action-v6";
+const CACHE = "sap-spellbook-v1";
 const ASSETS = [
   "./",
   "./index.html",

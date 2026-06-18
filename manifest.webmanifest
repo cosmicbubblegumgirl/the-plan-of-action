@@ -1,11 +1,11 @@
 {
-  "name": "The Plan of Action",
-  "short_name": "Plan of Action",
-  "description": "SAP C_CPI_2601 study planner and system-based assessment simulator.",
+  "name": "The SAP Spellbook",
+  "short_name": "SAP Spellbook",
+  "description": "Unofficial C_CPI_2601 study planner and system-based assessment simulator made by a learner for learners.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#081a2f",
-  "theme_color": "#081a2f",
+  "background_color": "#1f1442",
+  "theme_color": "#6d45d7",
   "icons": [
     {
       "src": "./icon.svg",

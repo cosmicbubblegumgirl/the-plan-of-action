@@ -1,21 +1,20 @@
-# The Plan of Action
+# The SAP Spellbook
 
-An unofficial, installable study web app for the **SAP Certified - Integration Developer** certification (`C_CPI_2601`).
+An unofficial, installable study web app for the **SAP Certified - Integration Developer** certification (`C_CPI_2601`), built by a learner for learners navigating SAP study paths.
 
 ## Features
 
 - Light and dark themes
 - IndexedDB-backed device profiles
 - Separate progress, checklists, mock history, and notes for every profile
-- Twelve system-based practical scenarios with guided and timed modes
-- Embedded SAP HANA SyBA runbook PDF with a HANA-style cockpit and SQL-console practice lab
-- Typed answer checks for HANA build tasks and concept questions
-- Searchable questions and answers
-- Step-by-step task walkthroughs
-- CLD900-aligned learning landmarks
-- Built-in and custom checklist items
+- Spell Simulator with twelve system-based practical scenarios
+- HANA Potion Lab with an embedded SAP HANA SyBA runbook PDF and SQL-console checks
+- The SAP Oracle searchable question and answer bank
+- Guided Scrolls step-by-step task walkthroughs
+- Milestone Moons for CLD900-aligned learning progress
+- Built-in and custom Potion Checklist items
 - Personal note creation, editing, search, deletion, and JSON export
-- Three-hour mock assessment timer
+- Final Boss Trial three-hour assessment timer
 - Offline support through a service worker
 
 ## Run locally
@@ -38,4 +37,4 @@ Publish the root of the `main` branch with GitHub Pages.
 
 ## Disclaimer
 
-This is an independent study aid. It does not reproduce SAP's proprietary exam environment or confidential exam items. Certification scope can change; verify details on the official SAP Learning certification page.
+This is an independent study aid. It is not affiliated with, sponsored by, or endorsed by SAP. It does not reproduce SAP's proprietary exam environment or confidential exam items. Certification scope can change; verify details on the official SAP Learning certification page. SAP and SAP HANA are trademarks or registered trademarks of SAP SE or its affiliates; names are used only to identify the study subject.

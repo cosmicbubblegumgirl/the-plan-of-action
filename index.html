@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#081a2f">
-  <meta name="description" content="The Plan of Action: an unofficial SAP C_CPI_2601 Integration Developer study and system-based assessment simulator.">
-  <title>The Plan of Action · C_CPI_2601</title>
+  <meta name="theme-color" content="#1f1442">
+  <meta name="description" content="The SAP Spellbook: an unofficial C_CPI_2601 Integration Developer study and system-based assessment simulator made by a learner for learners.">
+  <title>The SAP Spellbook · C_CPI_2601</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
@@ -14,46 +14,46 @@
   <div class="boot-screen" id="bootScreen">
     <div class="boot-logo">
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <path d="M8 9h48v13L34 55H8z" fill="currentColor"/>
-        <path d="M19 21h25M19 30h18M19 39h11" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="47" cy="39" r="8" fill="#40d5dc"/>
-        <path d="m44 39 2 2 4-5" fill="none" stroke="#06223d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="8" y="12" width="48" height="42" rx="8" fill="currentColor"/>
+        <path d="M32 17v32M14 18c8-4 14-3 18 1 4-4 10-5 18-1v31c-8-3-14-2-18 2-4-4-10-5-18-2z" fill="#fff7dc"/>
+        <path d="M20 28h7M20 36h6M38 28h7M38 36h6" stroke="#6d45d7" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="m32 8 2.1 4.2 4.6.7-3.3 3.2.8 4.5-4.2-2.2-4.2 2.2.8-4.5-3.3-3.2 4.6-.7z" fill="#ffc857"/>
       </svg>
     </div>
-    <strong>The Plan of Action</strong>
-    <span>Preparing your workspace...</span>
+    <strong>The SAP Spellbook</strong>
+    <span>Opening your study circle...</span>
   </div>
 
   <div class="app-shell" id="appShell" hidden>
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#dashboard" data-nav="dashboard" aria-label="The Plan of Action home">
+      <a class="brand" href="#dashboard" data-nav="dashboard" aria-label="The SAP Spellbook home">
         <span class="brand-logo">
           <svg viewBox="0 0 64 64" aria-hidden="true">
-            <path d="M8 9h48v13L34 55H8z" fill="currentColor"/>
-            <path d="M19 21h25M19 30h18M19 39h11" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
-            <circle cx="47" cy="39" r="8" fill="#40d5dc"/>
-            <path d="m44 39 2 2 4-5" fill="none" stroke="#06223d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="8" y="12" width="48" height="42" rx="8" fill="currentColor"/>
+            <path d="M32 17v32M14 18c8-4 14-3 18 1 4-4 10-5 18-1v31c-8-3-14-2-18 2-4-4-10-5-18-2z" fill="#fff7dc"/>
+            <path d="M20 28h7M20 36h6M38 28h7M38 36h6" stroke="#6d45d7" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="m32 8 2.1 4.2 4.6.7-3.3 3.2.8 4.5-4.2-2.2-4.2 2.2.8-4.5-3.3-3.2 4.6-.7z" fill="#ffc857"/>
           </svg>
         </span>
         <span class="brand-copy">
-          <strong>The Plan of Action</strong>
-          <small>C_CPI_2601</small>
+          <strong>The SAP Spellbook</strong>
+          <small>Unofficial C_CPI_2601</small>
         </span>
       </a>
 
       <nav class="primary-nav" id="primaryNav" aria-label="Application navigation">
         <p class="nav-label">Workspace</p>
-        <button class="nav-item active" data-nav="dashboard" type="button"><span data-icon="dashboard"></span><span>Dashboard</span></button>
-        <button class="nav-item" data-nav="roadmap" type="button"><span data-icon="roadmap"></span><span>Study roadmap</span></button>
-        <button class="nav-item" data-nav="simulator" type="button"><span data-icon="lab"></span><span>System simulator</span><b>12</b></button>
-        <button class="nav-item" data-nav="hana" type="button"><span data-icon="hana"></span><span>HANA SyBA lab</span><b>15</b></button>
-        <button class="nav-item" data-nav="questions" type="button"><span data-icon="questions"></span><span>Questions & answers</span></button>
-        <button class="nav-item" data-nav="walkthroughs" type="button"><span data-icon="steps"></span><span>Task walkthroughs</span></button>
+        <button class="nav-item active" data-nav="dashboard" type="button"><span data-icon="dashboard"></span><span>Spell Desk</span></button>
+        <button class="nav-item" data-nav="roadmap" type="button"><span data-icon="roadmap"></span><span>Quest Map</span></button>
+        <button class="nav-item" data-nav="simulator" type="button"><span data-icon="lab"></span><span>Spell Simulator</span><b>12</b></button>
+        <button class="nav-item" data-nav="hana" type="button"><span data-icon="hana"></span><span>HANA Potion Lab</span><b>15</b></button>
+        <button class="nav-item" data-nav="questions" type="button"><span data-icon="questions"></span><span>The SAP Oracle</span></button>
+        <button class="nav-item" data-nav="walkthroughs" type="button"><span data-icon="steps"></span><span>Guided Scrolls</span></button>
         <p class="nav-label">Progress</p>
-        <button class="nav-item" data-nav="landmarks" type="button"><span data-icon="landmark"></span><span>Learning landmarks</span></button>
-        <button class="nav-item" data-nav="checklist" type="button"><span data-icon="checklist"></span><span>Checklist</span></button>
-        <button class="nav-item" data-nav="notes" type="button"><span data-icon="notes"></span><span>My notes</span></button>
-        <button class="nav-item nav-mock" data-nav="mock" type="button"><span data-icon="timer"></span><span>3-hour mock</span></button>
+        <button class="nav-item" data-nav="landmarks" type="button"><span data-icon="landmark"></span><span>Milestone Moons</span></button>
+        <button class="nav-item" data-nav="checklist" type="button"><span data-icon="checklist"></span><span>Potion Checklist</span></button>
+        <button class="nav-item" data-nav="notes" type="button"><span data-icon="notes"></span><span>Spellbook Notes</span></button>
+        <button class="nav-item nav-mock" data-nav="mock" type="button"><span data-icon="timer"></span><span>Final Boss Trial</span></button>
       </nav>
 
       <div class="sidebar-card">
@@ -72,8 +72,8 @@
         <div class="topbar-left">
           <button class="icon-button mobile-only" id="menuButton" type="button" aria-label="Open navigation"><span data-icon="menu"></span></button>
           <div>
-            <p class="breadcrumb" id="breadcrumb">Workspace / Dashboard</p>
-            <h1 id="pageTitle">Dashboard</h1>
+            <p class="breadcrumb" id="breadcrumb">Workspace / Spell Desk</p>
+            <h1 id="pageTitle">Spell Desk</h1>
           </div>
         </div>
         <div class="topbar-actions">
@@ -92,9 +92,24 @@
       </header>
 
       <main class="page" id="page" tabindex="-1"></main>
-      <footer class="app-footer">
-        <span>Built for deliberate practice</span>
-        <strong>QuantumCupcakeCreation</strong>
+      <footer class="app-footer" aria-label="Creator and legal notes">
+        <div class="footer-orbit" aria-hidden="true"></div>
+        <div class="footer-brand">
+          <span class="footer-sigil" aria-hidden="true">QC</span>
+          <div>
+            <strong>A QuantumCupcake creation</strong>
+            <span>Built by a learner, for learners.</span>
+          </div>
+        </div>
+        <p class="footer-mission">Created to support others like me as we navigate SAP learning paths with a calmer plan, practical repetition, and honest study momentum.</p>
+        <div class="footer-legal">
+          <span>Independent study aid. Not affiliated with, sponsored by, or endorsed by SAP.</span>
+          <span>SAP and SAP HANA are trademarks or registered trademarks of SAP SE or its affiliates; names are used only to identify the study subject.</span>
+          <div>
+            <a href="https://www.sap.com/about/legal/copyright.html" target="_blank" rel="noreferrer">SAP copyright</a>
+            <a href="https://www.sap.com/about/legal/trademark.html" target="_blank" rel="noreferrer">SAP trademarks</a>
+          </div>
+        </div>
       </footer>
     </div>
   </div>

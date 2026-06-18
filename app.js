@@ -3,6 +3,7 @@
 
   const DB_NAME = "the-plan-of-action";
   const DB_VERSION = 1;
+  const APP_NAME = "The SAP Spellbook";
   const ACTIVE_PROFILE_KEY = "poa-active-profile";
   const THEME_KEY = "poa-theme";
   const THREE_HOURS = 3 * 60 * 60 * 1000;
@@ -13,16 +14,16 @@
   };
 
   const pageMeta = {
-    dashboard: ["Dashboard", "Workspace / Dashboard"],
-    roadmap: ["Study roadmap", "Workspace / Study roadmap"],
-    simulator: ["System simulator", "Workspace / System simulator"],
-    hana: ["HANA SyBA lab", "Workspace / HANA SyBA lab"],
-    questions: ["Questions & answers", "Workspace / Questions & answers"],
-    walkthroughs: ["Task walkthroughs", "Workspace / Task walkthroughs"],
-    landmarks: ["Learning landmarks", "Progress / Learning landmarks"],
-    checklist: ["Checklist", "Progress / Checklist"],
-    notes: ["My notes", "Progress / My notes"],
-    mock: ["3-hour mock assessment", "Assessment / Timed mock"]
+    dashboard: ["Spell Desk", "Workspace / Spell Desk"],
+    roadmap: ["Quest Map", "Workspace / Quest Map"],
+    simulator: ["Spell Simulator", "Workspace / Spell Simulator"],
+    hana: ["HANA Potion Lab", "Workspace / HANA Potion Lab"],
+    questions: ["The SAP Oracle", "Workspace / The SAP Oracle"],
+    walkthroughs: ["Guided Scrolls", "Workspace / Guided Scrolls"],
+    landmarks: ["Milestone Moons", "Progress / Milestone Moons"],
+    checklist: ["Potion Checklist", "Progress / Potion Checklist"],
+    notes: ["Spellbook Notes", "Progress / Spellbook Notes"],
+    mock: ["Final Boss Trial", "Assessment / Final Boss Trial"]
   };
 
   const icons = {
@@ -1061,9 +1062,9 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     const renderers = {
       dashboard: renderDashboard,
       roadmap: renderRoadmap,
-    simulator: renderSimulator,
-    hana: renderHanaLab,
-    questions: renderQuestions,
+      simulator: renderSimulator,
+      hana: renderHanaLab,
+      questions: renderQuestions,
       walkthroughs: renderWalkthroughs,
       landmarks: renderLandmarks,
       checklist: renderChecklist,
@@ -1083,13 +1084,14 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       <section class="source-strip">
         <div>
           <h3>Use the official SAP material as your source of truth</h3>
-          <p>Scope and product behavior can change. These links were checked on 12 June 2026.</p>
+          <p>This spellbook is unofficial and learner-made. Scope and product behavior can change, so verify important details with SAP Learning.</p>
         </div>
         <div class="source-row">
           <a href="https://learning.sap.com/certifications/sap-certified-associate-integration-developer" target="_blank" rel="noreferrer">Certification</a>
           <a href="https://learning.sap.com/learning-journeys/developing-with-sap-integration-suite" target="_blank" rel="noreferrer">Learning journey</a>
           <a href="https://learning.sap.com/courses/sap-cloud-platform-integration-service-overview" target="_blank" rel="noreferrer">CLD900</a>
           <a href="https://learning.sap.com/helpcenter/certification-support/step-by-step-guide-practical-exams" target="_blank" rel="noreferrer">Practical exam guide</a>
+          <a href="https://www.sap.com/about/legal/trademark.html" target="_blank" rel="noreferrer">SAP trademark notes</a>
         </div>
       </section>
     `;
@@ -1112,11 +1114,11 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">C_CPI_2601 · Integration Developer</p>
-          <h2>Turn the syllabus into a repeatable plan of action.</h2>
-          <p>Study the current learning journey, operate a tenant-style simulator, document what you learn, and rehearse a complete three-hour assessment.</p>
+          <h2>Turn the syllabus into a spellbook you can actually use.</h2>
+          <p>Follow the quest map, practice system spells, brew through the HANA lab, capture notes, and face the final three-hour trial with less chaos.</p>
           <div class="hero-actions">
-            <button class="button button-primary" data-route="simulator" data-open-challenge="${next}" type="button">Continue practical training ${icon("arrow")}</button>
-            <button class="button button-secondary" data-route="roadmap" type="button">View 14-day roadmap</button>
+            <button class="button button-primary" data-route="simulator" data-open-challenge="${next}" type="button">Continue spell practice ${icon("arrow")}</button>
+            <button class="button button-secondary" data-route="roadmap" type="button">Open Quest Map</button>
           </div>
         </div>
         <div class="hero-score">
@@ -1128,11 +1130,11 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       </section>
 
       <section class="metric-grid">
-        ${metricCard("roadmap", `${Object.values(userState.roadmap).filter(Boolean).length}/${roadmapDays.length}`, "Roadmap days complete")}
-        ${metricCard("lab", `${Object.values(userState.simPassed).filter(Boolean).length}/${systemChallenges.length}`, "System tasks passed")}
-        ${metricCard("hana", `${Object.values(userState.hanaPassed || {}).filter(Boolean).length}/${hanaBuildTasks.length}`, "HANA SyBA builds checked")}
-        ${metricCard("questions", `${Object.keys(userState.qaReviewed).length}/${qaItems.length}`, "Answers reviewed")}
-        ${metricCard("notes", String(notes.length), "Personal notes")}
+        ${metricCard("roadmap", `${Object.values(userState.roadmap).filter(Boolean).length}/${roadmapDays.length}`, "Quest days complete")}
+        ${metricCard("lab", `${Object.values(userState.simPassed).filter(Boolean).length}/${systemChallenges.length}`, "Simulator spells passed")}
+        ${metricCard("hana", `${Object.values(userState.hanaPassed || {}).filter(Boolean).length}/${hanaBuildTasks.length}`, "Potion builds checked")}
+        ${metricCard("questions", `${Object.keys(userState.qaReviewed).length}/${qaItems.length}`, "Oracle answers reviewed")}
+        ${metricCard("notes", String(notes.length), "Spellbook notes")}
       </section>
 
       <section class="dashboard-grid">
@@ -1151,11 +1153,11 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
               <button class="button button-primary button-small" data-route="simulator" data-open-challenge="${next}" type="button">Open task</button>
             </div>
             <div class="progress-list" style="margin-top:20px">
-              ${progressLine("Study roadmap", stats.roadmap)}
-              ${progressLine("System simulator", stats.simulator)}
-              ${progressLine("HANA SyBA lab", stats.hana)}
-              ${progressLine("Task walkthroughs", stats.walkthrough)}
-              ${progressLine("Learning landmarks", stats.landmark)}
+              ${progressLine("Quest Map", stats.roadmap)}
+              ${progressLine("Spell Simulator", stats.simulator)}
+              ${progressLine("HANA Potion Lab", stats.hana)}
+              ${progressLine("Guided Scrolls", stats.walkthrough)}
+              ${progressLine("Milestone Moons", stats.landmark)}
             </div>
           </div>
         </div>
@@ -1170,13 +1172,13 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
 
       <section style="margin-top:20px">
         <div class="section-heading">
-          <div><p class="eyebrow">Your workspace</p><h2 style="font-size:1.6rem">Everything needed for deliberate practice</h2></div>
+          <div><p class="eyebrow">Your spell desk</p><h2 style="font-size:1.6rem">Everything needed for deliberate practice</h2></div>
         </div>
         <div class="feature-grid">
-          ${featureCard("lab", "System simulator", "Twelve original, exam-aligned scenarios for Cloud Integration, API Management, Event Mesh, monitoring, and architecture.", "simulator")}
-          ${featureCard("hana", "HANA SyBA lab", "Practice the uploaded runbook in a HANA-style cockpit with SQL-console checks.", "hana")}
-          ${featureCard("steps", "Step-by-step tasks", "Check off every action in eight practical walkthroughs and keep the exact workflow fresh.", "walkthroughs")}
-          ${featureCard("notes", "Personal knowledge base", "Write, search, edit, and export notes that remain separate for each device profile.", "notes")}
+          ${featureCard("lab", "Spell Simulator", "Twelve original, exam-aligned scenarios for Cloud Integration, API Management, Event Mesh, monitoring, and architecture.", "simulator")}
+          ${featureCard("hana", "HANA Potion Lab", "Practice the uploaded runbook in a HANA-style cockpit with SQL-console checks.", "hana")}
+          ${featureCard("steps", "Guided Scrolls", "Check off every action in eight practical walkthroughs and keep the exact workflow fresh.", "walkthroughs")}
+          ${featureCard("notes", "Spellbook Notes", "Write, search, edit, and export notes that remain separate for each device profile.", "notes")}
         </div>
       </section>
       ${sourceStrip()}
@@ -1203,7 +1205,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
         <span class="metric-icon">${icon(iconName)}</span>
         <h3>${esc(title)}</h3>
         <p>${esc(description)}</p>
-        <button class="text-link" data-route="${route}" type="button">Open workspace →</button>
+        <button class="text-link" data-route="${route}" type="button">Open section →</button>
       </article>
     `;
   }
@@ -1216,8 +1218,8 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     }, 0);
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">14-day preparation route</p><h2>Study with a practical finish line</h2><p>Move from the official concepts to timed tenant work. Mark days complete as you finish the full objective, not when you merely open the material.</p></div>
-        <div class="heading-actions"><button class="button button-secondary" data-reset-roadmap type="button">Reset roadmap</button></div>
+        <div><p class="eyebrow">14-day preparation route</p><h2>Quest Map</h2><p>Move from official concepts to timed tenant work. Mark days complete as you finish the full objective, not when you merely open the material.</p></div>
+        <div class="heading-actions"><button class="button button-secondary" data-reset-roadmap type="button">Reset quest map</button></div>
       </div>
       <div class="roadmap-layout">
         <section class="panel">
@@ -1233,14 +1235,14 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
           </div>
         </section>
         <aside class="panel sticky-panel">
-          <div class="panel-head"><div><h3>Plan summary</h3><p>Based on your checked days</p></div></div>
+          <div class="panel-head"><div><h3>Quest summary</h3><p>Based on your checked days</p></div></div>
           <div class="panel-body study-summary">
             <div class="summary-stat"><span>Completed</span><strong>${done} days</strong></div>
             <div class="summary-stat"><span>Remaining</span><strong>${roadmapDays.length - done} days</strong></div>
             <div class="summary-stat"><span>Estimated time</span><strong>${Math.floor(remainingMinutes / 60)}h ${remainingMinutes % 60}m</strong></div>
             <div class="summary-stat"><span>Practical days</span><strong>7 of 14</strong></div>
             <div class="callout">A system-based assessment rewards reliable execution. Repeat the tasks that feel slow even after you understand the concept.</div>
-            <button class="button button-primary" data-route="simulator" type="button">Open system simulator</button>
+            <button class="button button-primary" data-route="simulator" type="button">Open Spell Simulator</button>
           </div>
         </aside>
       </div>
@@ -1253,8 +1255,8 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     const passed = Object.values(userState.simPassed).filter(Boolean).length;
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">Guided practical environment</p><h2>System-based task simulator</h2><p>Complete twelve original scenarios built around the current CLD900 learning objectives. Guided mode gives hints and exact feedback.</p></div>
-        <div class="heading-actions"><span class="tag green">${passed}/${systemChallenges.length} passed</span><button class="button button-secondary" data-route="mock" type="button">Open timed mock</button></div>
+        <div><p class="eyebrow">Guided practical environment</p><h2>Spell Simulator</h2><p>Complete twelve original scenarios built around the current CLD900 learning objectives. Guided mode gives hints and exact feedback.</p></div>
+        <div class="heading-actions"><span class="tag green">${passed}/${systemChallenges.length} passed</span><button class="button button-secondary" data-route="mock" type="button">Open Final Boss Trial</button></div>
       </div>
       <div class="simulator-layout">
         <aside class="challenge-list">
@@ -1454,8 +1456,8 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     return `
       <div class="section-heading">
         <div>
-          <p class="eyebrow">HANA runbook lab</p>
-          <h2>SAP HANA SyBA virtual build lab</h2>
+          <p class="eyebrow">Runbook potion bench</p>
+          <h2>HANA Potion Lab</h2>
           <p>Work through the PDF in an assessment-style HANA workspace. Type SQL or cockpit evidence, validate it, and compare your answer with the runbook pattern.</p>
         </div>
         <div class="heading-actions">
@@ -1467,7 +1469,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       <section class="hana-hero panel">
         <div>
           <p class="eyebrow">Browser-only practice lab</p>
-          <h3>HANA cockpit + Database Explorer</h3>
+          <h3>HANA cockpit + Database Explorer potion bench</h3>
           <p>This lab checks your typed commands against the runbook. It is intentionally browser-only, so nothing is sent to a SAP HANA tenant.</p>
         </div>
         <div class="hana-score-card">
@@ -1487,13 +1489,13 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
 
       <section class="hana-lower-grid">
         <div class="panel">
-          <div class="panel-head"><div><h3>Typed runbook questions</h3><p>${qaPassed}/${hanaQaItems.length} concept answers correct</p></div><span class="tag">${qaPassed}/${hanaQaItems.length}</span></div>
+          <div class="panel-head"><div><h3>Potion checks</h3><p>${qaPassed}/${hanaQaItems.length} concept answers correct</p></div><span class="tag">${qaPassed}/${hanaQaItems.length}</span></div>
           <div class="hana-qa-list">
             ${hanaQaItems.map((item, index) => hanaQaCard(item, index)).join("")}
           </div>
         </div>
         <div class="panel">
-          <div class="panel-head"><div><h3>Embedded runbook PDF</h3><p>Reference copy from your uploaded file</p></div></div>
+          <div class="panel-head"><div><h3>Embedded runbook scroll</h3><p>Reference copy from your uploaded file</p></div></div>
           <div class="pdf-frame-wrap">
             <iframe title="SAP HANA SyBA Practice Build Runbook" src="${RUNBOOK_PDF_PATH}"></iframe>
           </div>
@@ -1617,7 +1619,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     });
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">Fast recall bank</p><h2>Questions and answers</h2><p>Use these original study prompts to explain the product behavior in your own words. Reveal an answer only after you commit to a response.</p></div>
+        <div><p class="eyebrow">Fast recall bank</p><h2>The SAP Oracle</h2><p>Use these original study prompts to explain the product behavior in your own words. Reveal an answer only after you commit to a response.</p></div>
         <div class="heading-actions"><span class="tag">${Object.keys(userState.qaReviewed).length}/${qaItems.length} reviewed</span></div>
       </div>
       <div class="filter-bar">
@@ -1646,7 +1648,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     const completed = Object.values(userState.walkSteps).filter(Boolean).length;
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">Task completion guides</p><h2>Step-by-step walkthroughs</h2><p>Check each action only after you can perform it yourself. The wording describes product workflows without reproducing confidential exam tasks.</p></div>
+        <div><p class="eyebrow">Task completion guides</p><h2>Guided Scrolls</h2><p>Check each action only after you can perform it yourself. The wording describes product workflows without reproducing confidential exam tasks.</p></div>
         <div class="heading-actions"><span class="tag green">${completed}/${totalSteps} steps</span></div>
       </div>
       <section class="walkthrough-list">
@@ -1682,7 +1684,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     const done = Object.values(userState.landmarks).filter(Boolean).length;
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">CLD900-aligned milestones</p><h2>Learning landmarks</h2><p>These five landmarks follow the current official course units and help you see whether your practical preparation covers the full journey.</p></div>
+        <div><p class="eyebrow">CLD900-aligned milestones</p><h2>Milestone Moons</h2><p>These five milestones follow the current official course units and help you see whether your practical preparation covers the full journey.</p></div>
         <div class="heading-actions"><span class="tag green">${done}/${landmarks.length} complete</span></div>
       </div>
       <section class="landmark-grid">
@@ -1709,7 +1711,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     const completed = allItems.filter((item) => userState.checklist[item.id]).length;
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">Preparation control</p><h2>Readiness checklist</h2><p>Use the built-in requirements and add your own. Every device profile has an independent checklist.</p></div>
+        <div><p class="eyebrow">Preparation control</p><h2>Potion Checklist</h2><p>Use the built-in requirements and add your own. Every device profile has an independent checklist.</p></div>
         <div class="heading-actions"><span class="tag green">${completed}/${allItems.length} checked</span><button class="button button-secondary" data-reset-checklist type="button">Reset checks</button></div>
       </div>
       <div class="checklist-layout">
@@ -1731,7 +1733,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
           `).join("")}
         </section>
         <aside class="panel sticky-panel">
-          <div class="panel-head"><div><h3>Add your own item</h3><p>Personalize your exam plan</p></div></div>
+          <div class="panel-head"><div><h3>Add your own potion step</h3><p>Personalize your exam plan</p></div></div>
           <div class="panel-body">
             <form class="custom-check-form" id="customCheckForm">
               <label for="customCheckGroup">Section</label>
@@ -1755,7 +1757,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     const selected = notes.find((note) => note.id === selectedNoteId) || null;
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">Device-local knowledge base</p><h2>My notes</h2><p>Capture exact syntax, troubleshooting findings, and task reminders. Notes are stored in IndexedDB under ${esc(activeProfile.name)}'s profile.</p></div>
+        <div><p class="eyebrow">Device-local knowledge base</p><h2>Spellbook Notes</h2><p>Capture exact syntax, troubleshooting findings, and task reminders. Notes are stored in IndexedDB under ${esc(activeProfile.name)}'s profile.</p></div>
         <div class="heading-actions"><button class="button button-secondary" data-export-notes type="button">${icon("download")} Export JSON</button><button class="button button-primary" data-new-note type="button">${icon("plus")} New note</button></div>
       </div>
       <div class="filter-bar">
@@ -1805,26 +1807,26 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       return `
         <section class="mock-welcome">
           <div>
-            <p class="eyebrow" style="color:#ffaf6b">Timed system rehearsal</p>
+            <p class="eyebrow" style="color:#ffaf6b">Final Boss Trial</p>
             <h2>Twelve activities. Three hours. One deliberate attempt.</h2>
-            <p>The mock reuses the system scenarios without hints or immediate feedback. Your guided answers remain untouched.</p>
+            <p>The trial reuses the system scenarios without hints or immediate feedback. Your guided answers remain untouched.</p>
             <ul class="mock-rule-list">
               <li>Read every activity before configuring answers.</li>
               <li>Exact aliases, paths, rates, names, and topic values matter.</li>
               <li>Use the timer and reserve thirty minutes for review.</li>
               <li>Submission reveals a task-by-task result and saves the attempt.</li>
             </ul>
-            <button class="button button-warning" data-start-mock type="button">Start 3-hour assessment</button>
+            <button class="button button-warning" data-start-mock type="button">Start Final Boss Trial</button>
           </div>
-          <div class="mock-clock"><div><strong>03:00:00</strong><span>Assessment time</span></div></div>
+          <div class="mock-clock"><div><strong>03:00:00</strong><span>Trial time</span></div></div>
         </section>
       `;
     }
     const challenge = systemChallenges[mock.current || 0];
     return `
       <div class="section-heading">
-        <div><p class="eyebrow">Countdown active</p><h2>Mock assessment in progress</h2><p>Answers save automatically to this device profile. Feedback remains hidden until submission.</p></div>
-        <div class="heading-actions"><button class="button button-warning" data-submit-mock type="button">Submit assessment</button></div>
+        <div><p class="eyebrow">Countdown active</p><h2>Final Boss Trial in progress</h2><p>Answers save automatically to this device profile. Feedback remains hidden until submission.</p></div>
+        <div class="heading-actions"><button class="button button-warning" data-submit-mock type="button">Submit trial</button></div>
       </div>
       <div class="mock-active">
         <aside class="challenge-list">
@@ -1839,7 +1841,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
           <div class="mock-topline"><strong>Activity ${(mock.current || 0) + 1} of ${systemChallenges.length}</strong><span>Feedback hidden</span></div>
           ${challengeWorkspace(challenge, "mock").replace(
             '<div class="challenge-nav">\n            \n          </div>',
-            `<div class="challenge-nav"><button class="button button-warning" data-submit-mock type="button">Submit assessment</button></div>`
+            `<div class="challenge-nav"><button class="button button-warning" data-submit-mock type="button">Submit trial</button></div>`
           )}
         </section>
       </div>
@@ -1861,7 +1863,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
         </div>
         <div class="heading-actions" style="justify-content:center">
           <button class="button button-secondary" data-review-mock type="button">Review in guided mode</button>
-          <button class="button button-warning" data-restart-mock type="button">Start another attempt</button>
+          <button class="button button-warning" data-restart-mock type="button">Start another trial</button>
         </div>
       </section>
     `;
@@ -1960,7 +1962,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       auto
     });
     userState.mock.history = userState.mock.history.slice(0, 10);
-    logActivity(`Completed a mock assessment with ${score}%`);
+    logActivity(`Completed the Final Boss Trial with ${score}%`);
     await saveUserState();
     showToast(auto ? "Time expired. The mock was submitted automatically." : "Mock assessment submitted.", auto ? "error" : "success");
     renderRoute();
@@ -2049,7 +2051,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     }
 
     if (event.target.closest("[data-reset-roadmap]")) {
-      confirmDialog("Reset roadmap?", "This clears all fourteen day-completion checks for the current profile.", async () => {
+      confirmDialog("Reset Quest Map?", "This clears all fourteen day-completion checks for the current profile.", async () => {
         userState.roadmap = {};
         await saveUserState();
         renderRoute();
@@ -2325,7 +2327,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
 
     if (event.target.closest("[data-export-notes]")) {
       const payload = {
-        application: "The Plan of Action",
+        application: APP_NAME,
         profile: activeProfile.name,
         exportedAt: new Date().toISOString(),
         notes
@@ -2334,7 +2336,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `plan-of-action-notes-${activeProfile.id}.json`;
+      link.download = `sap-spellbook-notes-${activeProfile.id}.json`;
       link.click();
       URL.revokeObjectURL(url);
       showToast("Notes exported.", "success");
@@ -2352,10 +2354,10 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
         current: 0,
         history: userState.mock.history || []
       };
-      logActivity("Started a three-hour mock assessment");
+      logActivity("Started the Final Boss Trial");
       await saveUserState();
       renderRoute();
-      showToast("Mock assessment started. The countdown is active.");
+      showToast("Final Boss Trial started. The countdown is active.");
       return;
     }
 
@@ -2413,7 +2415,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     }
 
     if (event.target.closest("[data-submit-mock]")) {
-      confirmDialog("Submit mock assessment?", "Submission stops the timer and reveals the task-by-task result.", () => submitMock(false));
+      confirmDialog("Submit Final Boss Trial?", "Submission stops the timer and reveals the task-by-task result.", () => submitMock(false));
       return;
     }
 
@@ -2552,7 +2554,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       if (!group || !text) return;
       userState.customChecklist.push({ id: `custom-${crypto.randomUUID()}`, group, text, custom: true });
       await saveUserState();
-      showToast("Checklist item added.", "success");
+      showToast("Potion checklist item added.", "success");
       renderRoute();
       return;
     }

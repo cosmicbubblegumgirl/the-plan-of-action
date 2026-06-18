@@ -29,5 +29,5 @@ createServer((request, response) => {
   });
   createReadStream(file).pipe(response);
 }).listen(port, "127.0.0.1", () => {
-  console.log(`The Plan of Action: http://127.0.0.1:${port}`);
+  console.log(`The SAP Spellbook: http://127.0.0.1:${port}`);
 });
