@@ -6,6 +6,11 @@
   const ACTIVE_PROFILE_KEY = "poa-active-profile";
   const THEME_KEY = "poa-theme";
   const THREE_HOURS = 3 * 60 * 60 * 1000;
+  const RUNBOOK_PDF_PATH = "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf";
+  const HANA_FEEDBACK_COPY = {
+    pass: "Looks right. It matches the runbook checks.",
+    fail: "Not quite yet. Add the missing build details, and remove anything that does not belong in this step."
+  };
 
   const pageMeta = {
     dashboard: ["Dashboard", "Workspace / Dashboard"],
@@ -1169,7 +1174,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
         </div>
         <div class="feature-grid">
           ${featureCard("lab", "System simulator", "Twelve original, exam-aligned scenarios for Cloud Integration, API Management, Event Mesh, monitoring, and architecture.", "simulator")}
-          ${featureCard("hana", "HANA SyBA lab", "The uploaded runbook becomes a virtual HANA cockpit and SQL-console sandbox with typed-answer validation.", "hana")}
+          ${featureCard("hana", "HANA SyBA lab", "Practice the uploaded runbook in a HANA-style cockpit with SQL-console checks.", "hana")}
           ${featureCard("steps", "Step-by-step tasks", "Check off every action in eight practical walkthroughs and keep the exact workflow fresh.", "walkthroughs")}
           ${featureCard("notes", "Personal knowledge base", "Write, search, edit, and export notes that remain separate for each device profile.", "notes")}
         </div>
@@ -1449,21 +1454,21 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     return `
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Uploaded runbook sandbox</p>
+          <p class="eyebrow">HANA runbook lab</p>
           <h2>SAP HANA SyBA virtual build lab</h2>
-          <p>Practice the PDF runbook in an embedded assessment-style environment. Type SQL or cockpit evidence, run validation, see whether the build is correct, then reveal the expected answer.</p>
+          <p>Work through the PDF in an assessment-style HANA workspace. Type SQL or cockpit evidence, validate it, and compare your answer with the runbook pattern.</p>
         </div>
         <div class="heading-actions">
           <span class="tag green">${passedCount}/${hanaBuildTasks.length} builds correct</span>
-          <a class="button button-secondary" href="./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf" target="_blank" rel="noreferrer">Open PDF</a>
+          <a class="button button-secondary" href="${RUNBOOK_PDF_PATH}" target="_blank" rel="noreferrer">Open PDF</a>
         </div>
       </div>
 
       <section class="hana-hero panel">
         <div>
-          <p class="eyebrow">Virtual environment</p>
-          <h3>HANA cockpit + Database Explorer simulator</h3>
-          <p>This is a safe browser sandbox. It validates typed commands and evidence against the runbook, but it does not connect to a real SAP HANA system.</p>
+          <p class="eyebrow">Browser-only practice lab</p>
+          <h3>HANA cockpit + Database Explorer</h3>
+          <p>This lab checks your typed commands against the runbook. It is intentionally browser-only, so nothing is sent to a SAP HANA tenant.</p>
         </div>
         <div class="hana-score-card">
           <strong>${Math.round((passedCount / hanaBuildTasks.length) * 100)}%</strong>
@@ -1473,13 +1478,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
 
       <div class="hana-layout">
         <aside class="challenge-list">
-          ${hanaBuildTasks.map((item, index) => `
-            <button class="challenge-button ${index === currentHanaTask ? "active" : ""} ${userState.hanaPassed?.[item.id] ? "passed" : ""}" data-hana-task="${index}" type="button">
-              <span class="challenge-index">${userState.hanaPassed?.[item.id] ? "✓" : String(index + 1).padStart(2, "0")}</span>
-              <span><strong>${esc(item.title)}</strong><small>${esc(item.context)} · ${esc(item.tool)}</small></span>
-              <span class="challenge-status">${userState.hanaPassed?.[item.id] ? "●" : ""}</span>
-            </button>
-          `).join("")}
+          ${hanaBuildTasks.map(hanaTaskButton).join("")}
         </aside>
         <section class="hana-workbench">
           ${hanaTaskWorkspace(task)}
@@ -1496,10 +1495,21 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
         <div class="panel">
           <div class="panel-head"><div><h3>Embedded runbook PDF</h3><p>Reference copy from your uploaded file</p></div></div>
           <div class="pdf-frame-wrap">
-            <iframe title="SAP HANA SyBA Practice Build Runbook" src="./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf"></iframe>
+            <iframe title="SAP HANA SyBA Practice Build Runbook" src="${RUNBOOK_PDF_PATH}"></iframe>
           </div>
         </div>
       </section>
+    `;
+  }
+
+  function hanaTaskButton(item, index) {
+    const passed = Boolean(userState.hanaPassed?.[item.id]);
+    return `
+      <button class="challenge-button ${index === currentHanaTask ? "active" : ""} ${passed ? "passed" : ""}" data-hana-task="${index}" type="button">
+        <span class="challenge-index">${passed ? "✓" : String(index + 1).padStart(2, "0")}</span>
+        <span><strong>${esc(item.title)}</strong><small>${esc(item.context)} · ${esc(item.tool)}</small></span>
+        <span class="challenge-status">${passed ? "●" : ""}</span>
+      </button>
     `;
   }
 
@@ -1552,7 +1562,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
           </div>
         </div>
       </div>
-      ${feedback ? hanaFeedbackBlock(task, feedback) : '<div class="hint-box">Type an answer and choose Validate build. The correct answer appears after each check.</div>'}
+      ${feedback ? hanaFeedbackBlock(task, feedback) : '<div class="hint-box">Type your command or cockpit evidence, then validate the build. The expected answer appears after each check.</div>'}
     `;
   }
 
@@ -2172,9 +2182,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
       userState.hanaPassed[task.id] = result.pass;
       userState.hanaFeedback[task.id] = {
         ...result,
-        message: result.pass
-          ? "The typed answer matches the runbook validation pattern."
-          : "The typed answer is missing required HANA build details or includes an unsafe extra grant/object."
+        message: result.pass ? HANA_FEEDBACK_COPY.pass : HANA_FEEDBACK_COPY.fail
       };
       if (result.pass) logActivity(`Validated HANA build: ${task.title}`);
       await saveUserState();

@@ -8,8 +8,8 @@ An unofficial, installable study web app for the **SAP Certified - Integration D
 - IndexedDB-backed device profiles
 - Separate progress, checklists, mock history, and notes for every profile
 - Twelve system-based practical scenarios with guided and timed modes
-- Embedded SAP HANA SyBA runbook PDF with a virtual HANA cockpit and SQL-console sandbox
-- Typed-answer validation for HANA build tasks and concept checks
+- Embedded SAP HANA SyBA runbook PDF with a HANA-style cockpit and SQL-console practice lab
+- Typed answer checks for HANA build tasks and concept questions
 - Searchable questions and answers
 - Step-by-step task walkthroughs
 - CLD900-aligned learning landmarks
