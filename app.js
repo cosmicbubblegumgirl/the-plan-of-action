@@ -2574,6 +2574,24 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     }
   }
 
+  function registerServiceWorker() {
+    if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    let reloading = false;
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+
+    navigator.serviceWorker
+      .register("./service-worker.js")
+      .then((registration) => registration.update())
+      .catch(() => {});
+  }
+
   async function initialize() {
     document.querySelectorAll("[data-icon]").forEach((node) => {
       node.innerHTML = icon(node.dataset.icon);
@@ -2591,9 +2609,7 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     document.addEventListener("change", handleInput);
     document.addEventListener("submit", handleSubmit);
     window.addEventListener("hashchange", renderRoute);
-    if ("serviceWorker" in navigator && location.protocol !== "file:") {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-    }
+    registerServiceWorker();
   }
 
   initialize().catch((error) => {

@@ -1,4 +1,4 @@
-const CACHE = "plan-of-action-v3";
+const CACHE = "plan-of-action-v4";
 const ASSETS = [
   "./",
   "./index.html",
