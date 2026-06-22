@@ -213,6 +213,16 @@ svg {
   background: rgba(255, 255, 255, .06);
 }
 
+.brand-lockup {
+  padding: 6px 8px 10px;
+}
+
+.brand-logo-lockup {
+  display: block;
+  width: min(100%, 244px);
+  height: auto;
+}
+
 .brand-mark {
   width: 46px;
   height: 46px;

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 144" role="img" aria-labelledby="title desc">
+  <title id="title">SAP Spellbook Academy logo</title>
+  <desc id="desc">An original academy crest and wordmark for the two-stream certification study app.</desc>
+  <defs>
+    <linearGradient id="logo-bg" x1="11" y1="10" x2="120" y2="121" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#23202d"/>
+      <stop offset=".55" stop-color="#17161d"/>
+      <stop offset="1" stop-color="#10161a"/>
+    </linearGradient>
+    <linearGradient id="logo-cover" x1="22" y1="38" x2="108" y2="109" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22c8bc"/>
+      <stop offset=".52" stop-color="#705de8"/>
+      <stop offset="1" stop-color="#e9b94e"/>
+    </linearGradient>
+    <linearGradient id="logo-page" x1="29" y1="45" x2="100" y2="97" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff7df"/>
+      <stop offset=".58" stop-color="#eaf9f5"/>
+      <stop offset="1" stop-color="#c9f3ef"/>
+    </linearGradient>
+    <linearGradient id="logo-word" x1="135" y1="54" x2="344" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".42" stop-color="#dff8f5"/>
+      <stop offset="1" stop-color="#e9b94e"/>
+    </linearGradient>
+    <linearGradient id="logo-moonstone" x1="55" y1="18" x2="79" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff5bf"/>
+      <stop offset=".5" stop-color="#e7b84f"/>
+      <stop offset="1" stop-color="#7fdad2"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(8 16) scale(.86)">
+    <rect x="0" y="0" width="128" height="128" rx="30" fill="url(#logo-bg)"/>
+    <rect x="3" y="3" width="122" height="122" rx="27" fill="none" stroke="#7fdad2" stroke-opacity=".24" stroke-width="3"/>
+    <ellipse cx="64" cy="62" rx="50" ry="20" fill="none" stroke="#7fdad2" stroke-linecap="round" stroke-width="2.8" opacity=".42" transform="rotate(-21 64 62)"/>
+    <ellipse cx="64" cy="62" rx="42" ry="15" fill="none" stroke="#e9b94e" stroke-dasharray="4 8" stroke-linecap="round" stroke-width="2" opacity=".42" transform="rotate(-21 64 62)"/>
+    <circle cx="22" cy="76" r="3.8" fill="#7fdad2"/>
+    <circle cx="106" cy="49" r="3.8" fill="#e9b94e"/>
+    <path d="M20 43c16-8 31-7 44 5 13-12 28-13 44-5v63c-16-7-31-6-44 6-13-12-28-13-44-6z" fill="url(#logo-cover)"/>
+    <path d="M28 50c12-4 23-1 32 7v42c-9-7-20-9-32-6zm40 7c9-8 20-11 32-7v43c-12-3-23-1-32 6z" fill="url(#logo-page)"/>
+    <path d="M64 48v59" stroke="#151820" stroke-linecap="round" stroke-width="4" opacity=".42"/>
+    <path d="M38 64h13M38 76h15M77 64h13M77 76h9" stroke="#263837" stroke-linecap="round" stroke-width="4" opacity=".72"/>
+    <ellipse cx="94" cy="82" rx="12" ry="5" fill="#121a1f" stroke="#7fdad2" stroke-width="2"/>
+    <path d="M82 82v12c0 3 5.4 5 12 5s12-2 12-5V82" fill="#15242a" stroke="#7fdad2" stroke-width="2"/>
+    <ellipse cx="94" cy="94" rx="12" ry="5" fill="#1d3034" stroke="#7fdad2" stroke-width="2"/>
+    <path d="M88 87h12" stroke="#e9b94e" stroke-linecap="round" stroke-width="2"/>
+    <path d="M64 18l5.2 13.4L83 36.6l-13.8 5.2L64 55.2l-5.2-13.4L45 36.6l13.8-5.2z" fill="url(#logo-moonstone)"/>
+    <circle cx="64" cy="36.6" r="5.5" fill="#fff8dc"/>
+  </g>
+  <g transform="translate(132 28)">
+    <text x="0" y="18" fill="#7fdad2" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="900" letter-spacing="3">SAP</text>
+    <text x="0" y="55" fill="#f7fff9" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="32" font-weight="900" letter-spacing=".2">Spellbook</text>
+    <text x="0" y="92" fill="url(#logo-word)" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="36" font-weight="900" letter-spacing=".2">Academy</text>
+    <path d="M2 104h139" stroke="#7fdad2" stroke-linecap="round" stroke-width="3" opacity=".55"/>
+    <path d="M151 104h29" stroke="#e9b94e" stroke-linecap="round" stroke-width="3" opacity=".85"/>
+    <text x="1" y="126" fill="#9fded9" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="11" font-weight="800" letter-spacing="1.4">Two streams. One final boss.</text>
+  </g>
+</svg>

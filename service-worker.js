@@ -1,10 +1,11 @@
-const CACHE = "sap-spellbook-academy-v3";
+const CACHE = "sap-spellbook-academy-v4";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./icon.svg",
+  "./assets/spellbook-academy-logo.svg",
   "./manifest.webmanifest",
   "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf",
   "./assets/Sprint_2_Part_2_Self_Service_Migration_SAP_HANA_Cloud.docx",

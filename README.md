@@ -15,7 +15,7 @@ The site turns certification preparation into a practical academy: Spell Desk, P
 - Built Stream 2 from the uploaded HANA Cloud, self-service migration, and installation/administration materials.
 - Added system-based practice exams for both streams with embedded code blocks and an original publish-safe virtual Academy Console.
 - Added a Student Portal with browser-local account creation, login, hashed passcodes, and stream preference storage.
-- Added a new original logo and icon that are intentionally not based on the SAP logo.
+- Refreshed the original logo system with a crest icon and full academy wordmark that are intentionally not based on the SAP logo.
 - Added Stream 2 source scrolls to `assets/` for live GitHub Pages access.
 - Updated offline caching, manifest metadata, and README copy.
 
