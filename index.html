@@ -1,178 +1,84 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#1f1442">
-  <meta name="description" content="The SAP Spellbook: an unofficial C_CPI_2601 Integration Developer study and system-based assessment simulator made by a learner for learners.">
-  <title>The SAP Spellbook · C_CPI_2601</title>
+  <meta name="theme-color" content="#17161d">
+  <meta name="description" content="The SAP Spellbook Academy, an unofficial two-stream certification practice app for Integration Developer and Database Administrator - SAP HANA learners.">
+  <title>SAP Spellbook Academy</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <div class="boot-screen" id="bootScreen">
-    <div class="boot-logo">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect x="8" y="12" width="48" height="42" rx="8" fill="currentColor"/>
-        <path d="M32 17v32M14 18c8-4 14-3 18 1 4-4 10-5 18-1v31c-8-3-14-2-18 2-4-4-10-5-18-2z" fill="#fff7dc"/>
-        <path d="M20 28h7M20 36h6M38 28h7M38 36h6" stroke="#6d45d7" stroke-width="2.4" stroke-linecap="round"/>
-        <path d="m32 8 2.1 4.2 4.6.7-3.3 3.2.8 4.5-4.2-2.2-4.2 2.2.8-4.5-3.3-3.2 4.6-.7z" fill="#ffc857"/>
-      </svg>
-    </div>
-    <strong>The SAP Spellbook</strong>
-    <span>Opening your study circle...</span>
+    <img src="./icon.svg" alt="" class="boot-mark">
+    <strong>SAP Spellbook Academy</strong>
+    <span>Opening the academy gates...</span>
   </div>
 
   <div class="app-shell" id="appShell" hidden>
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="#dashboard" data-nav="dashboard" aria-label="The SAP Spellbook home">
-        <span class="brand-logo">
-          <svg viewBox="0 0 64 64" aria-hidden="true">
-            <rect x="8" y="12" width="48" height="42" rx="8" fill="currentColor"/>
-            <path d="M32 17v32M14 18c8-4 14-3 18 1 4-4 10-5 18-1v31c-8-3-14-2-18 2-4-4-10-5-18-2z" fill="#fff7dc"/>
-            <path d="M20 28h7M20 36h6M38 28h7M38 36h6" stroke="#6d45d7" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="m32 8 2.1 4.2 4.6.7-3.3 3.2.8 4.5-4.2-2.2-4.2 2.2.8-4.5-3.3-3.2 4.6-.7z" fill="#ffc857"/>
-          </svg>
-        </span>
-        <span class="brand-copy">
-          <strong>The SAP Spellbook</strong>
-          <small>Unofficial C_CPI_2601</small>
+      <a class="brand" href="#dashboard" data-route="dashboard" aria-label="SAP Spellbook Academy home">
+        <img src="./icon.svg" alt="" class="brand-mark">
+        <span>
+          <strong>SAP Spellbook Academy</strong>
+          <small>Unofficial study atelier</small>
         </span>
       </a>
 
-      <nav class="primary-nav" id="primaryNav" aria-label="Application navigation">
-        <p class="nav-label">Workspace</p>
-        <button class="nav-item active" data-nav="dashboard" type="button"><span data-icon="dashboard"></span><span>Spell Desk</span></button>
-        <button class="nav-item" data-nav="roadmap" type="button"><span data-icon="roadmap"></span><span>Quest Map</span></button>
-        <button class="nav-item" data-nav="simulator" type="button"><span data-icon="lab"></span><span>Spell Simulator</span><b>12</b></button>
-        <button class="nav-item" data-nav="hana" type="button"><span data-icon="hana"></span><span>HANA Potion Lab</span><b>15</b></button>
-        <button class="nav-item" data-nav="questions" type="button"><span data-icon="questions"></span><span>The SAP Oracle</span></button>
-        <button class="nav-item" data-nav="walkthroughs" type="button"><span data-icon="steps"></span><span>Guided Scrolls</span></button>
-        <p class="nav-label">Progress</p>
-        <button class="nav-item" data-nav="landmarks" type="button"><span data-icon="landmark"></span><span>Milestone Moons</span></button>
-        <button class="nav-item" data-nav="checklist" type="button"><span data-icon="checklist"></span><span>Potion Checklist</span></button>
-        <button class="nav-item" data-nav="notes" type="button"><span data-icon="notes"></span><span>Spellbook Notes</span></button>
-        <button class="nav-item nav-mock" data-nav="mock" type="button"><span data-icon="timer"></span><span>Final Boss Trial</span></button>
-      </nav>
+      <div class="stream-mini" id="streamMini"></div>
+
+      <nav class="primary-nav" id="primaryNav" aria-label="Academy sections"></nav>
 
       <div class="sidebar-card">
         <span class="pulse-dot"></span>
         <div>
-          <strong>System-based assessment</strong>
-          <small>180 minutes · English</small>
+          <strong>Two paths. One final boss.</strong>
+          <small>Progress saves in this browser</small>
         </div>
       </div>
 
-      <p class="sidebar-foot">Unofficial study tool · Device-local data</p>
+      <p class="sidebar-foot">Independent learner-built tool. Not affiliated with SAP.</p>
     </aside>
 
     <div class="app-column">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="icon-button mobile-only" id="menuButton" type="button" aria-label="Open navigation"><span data-icon="menu"></span></button>
+          <button class="icon-button mobile-only" id="menuButton" type="button" aria-label="Open navigation" title="Open navigation">
+            <span data-icon="menu"></span>
+          </button>
           <div>
-            <p class="breadcrumb" id="breadcrumb">Workspace / Spell Desk</p>
+            <p class="breadcrumb" id="breadcrumb">Academy / Spell Desk</p>
             <h1 id="pageTitle">Spell Desk</h1>
           </div>
         </div>
         <div class="topbar-actions">
           <div class="timer-pill" id="timerPill" hidden>
             <span class="pulse-dot"></span>
-            <span>Time left</span>
+            <span>Boss timer</span>
             <strong id="globalTimer">03:00:00</strong>
           </div>
-          <button class="icon-button" id="themeButton" type="button" aria-label="Toggle dark mode"><span data-icon="moon"></span></button>
-          <button class="profile-button" id="profileButton" type="button" aria-label="Open user profiles">
-            <span class="avatar" id="profileAvatar">G</span>
-            <span class="profile-copy"><strong id="profileName">Guest learner</strong><small>Device profile</small></span>
-            <span data-icon="chevron"></span>
+          <button class="icon-button" id="themeButton" type="button" aria-label="Toggle theme" title="Toggle theme">
+            <span data-icon="moon"></span>
           </button>
         </div>
       </header>
 
       <main class="page" id="page" tabindex="-1"></main>
-      <footer class="app-footer" aria-label="Creator and legal notes">
-        <div class="footer-orbit" aria-hidden="true"></div>
-        <div class="footer-brand">
-          <span class="footer-sigil" aria-hidden="true">QC</span>
-          <div>
-            <strong>A QuantumCupcake creation</strong>
-            <span>Built by a learner, for learners.</span>
-          </div>
+
+      <footer class="app-footer">
+        <div>
+          <strong>SAP Spellbook Academy</strong>
+          <span>Study the scrolls. Practise the spells. Defeat the exam beast.</span>
         </div>
-        <p class="footer-mission">Created to support others like me as we navigate SAP learning paths with a calmer plan, practical repetition, and honest study momentum.</p>
-        <div class="footer-legal">
-          <span>Independent study aid. Not affiliated with, sponsored by, or endorsed by SAP.</span>
-          <span>SAP and SAP HANA are trademarks or registered trademarks of SAP SE or its affiliates; names are used only to identify the study subject.</span>
-          <div>
-            <a href="https://www.sap.com/about/legal/copyright.html" target="_blank" rel="noreferrer">SAP copyright</a>
-            <a href="https://www.sap.com/about/legal/trademark.html" target="_blank" rel="noreferrer">SAP trademarks</a>
-          </div>
-        </div>
+        <p>Unofficial study aid. SAP, SAP HANA, SAP BTP, and other SAP product names are trademarks or registered trademarks of SAP SE or its affiliates.</p>
       </footer>
     </div>
   </div>
 
   <div class="sidebar-scrim" id="sidebarScrim" hidden></div>
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
-
-  <dialog class="app-dialog profile-dialog" id="profileDialog">
-    <form method="dialog" class="dialog-head">
-      <div>
-        <p class="eyebrow">Device profiles</p>
-        <h2>Choose your workspace</h2>
-      </div>
-      <button class="icon-button" value="cancel" aria-label="Close"><span data-icon="close"></span></button>
-    </form>
-    <p class="dialog-note">Profiles, progress, checklists, and notes are stored in this browser with IndexedDB. They are not cloud accounts.</p>
-    <div class="profile-list" id="profileList"></div>
-    <div class="dialog-divider"><span>Create a profile</span></div>
-    <form class="profile-create" id="profileCreateForm">
-      <label>
-        <span>Display name</span>
-        <input id="newProfileName" maxlength="40" required placeholder="Your name">
-      </label>
-      <label>
-        <span>Optional PIN</span>
-        <input id="newProfilePin" type="password" inputmode="numeric" maxlength="8" placeholder="4–8 digits">
-      </label>
-      <button class="button button-primary" type="submit">Create profile</button>
-    </form>
-  </dialog>
-
-  <dialog class="app-dialog pin-dialog" id="pinDialog">
-    <form method="dialog" class="dialog-head">
-      <div>
-        <p class="eyebrow">Protected profile</p>
-        <h2 id="pinTitle">Enter PIN</h2>
-      </div>
-      <button class="icon-button" value="cancel" aria-label="Close"><span data-icon="close"></span></button>
-    </form>
-    <form id="pinForm" class="pin-form">
-      <input id="pinProfileId" type="hidden">
-      <label>
-        <span>PIN</span>
-        <input id="profilePin" type="password" inputmode="numeric" maxlength="8" autofocus required>
-      </label>
-      <p class="form-error" id="pinError"></p>
-      <button class="button button-primary" type="submit">Open workspace</button>
-    </form>
-  </dialog>
-
-  <dialog class="app-dialog confirm-dialog" id="confirmDialog">
-    <div class="dialog-head">
-      <div>
-        <p class="eyebrow">Please confirm</p>
-        <h2 id="confirmTitle">Continue?</h2>
-      </div>
-    </div>
-    <p id="confirmMessage"></p>
-    <div class="dialog-actions">
-      <button class="button button-secondary" id="confirmCancel" type="button">Cancel</button>
-      <button class="button button-danger" id="confirmAccept" type="button">Confirm</button>
-    </div>
-  </dialog>
 
   <script src="./app.js"></script>
 </body>

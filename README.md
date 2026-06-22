@@ -1,21 +1,21 @@
-# The SAP Spellbook
+# SAP Spellbook Academy
 
-An unofficial, installable study web app for the **SAP Certified - Integration Developer** certification (`C_CPI_2601`), built by a learner for learners navigating SAP study paths.
+An unofficial, installable study web app with two certification streams:
 
-## Features
+- **Stream 1 Certification - Integration Developer**: The Apprentice Grimoire.
+- **Stream 2 Certification - Database Administrator - SAP HANA**: The Cloud Mage Grimoire.
 
-- Light and dark themes
-- IndexedDB-backed device profiles
-- Separate progress, checklists, mock history, and notes for every profile
-- Spell Simulator with twelve system-based practical scenarios
-- HANA Potion Lab with an embedded SAP HANA SyBA runbook PDF and SQL-console checks
-- The SAP Oracle searchable question and answer bank
-- Guided Scrolls step-by-step task walkthroughs
-- Milestone Moons for CLD900-aligned learning progress
-- Built-in and custom Potion Checklist items
-- Personal note creation, editing, search, deletion, and JSON export
-- Final Boss Trial three-hour assessment timer
-- Offline support through a service worker
+The site turns certification preparation into a practical academy: Spell Desk, Practice Grimoire, Quest Map, Arcane Library, Potion Labs, Debugging Charms, Spell Simulator, Final Boss Trial, and Moonstone Checklist.
+
+## What changed
+
+- Rebranded from a single SAP Spellbook into SAP Spellbook Academy.
+- Added a stream chooser and stream-specific content model.
+- Preserved the Integration Developer path as Stream 1.
+- Built Stream 2 from the uploaded HANA Cloud, self-service migration, and installation/administration materials.
+- Added a new original logo and icon that are intentionally not based on the SAP logo.
+- Added Stream 2 source scrolls to `assets/` for live GitHub Pages access.
+- Updated offline caching, manifest metadata, and README copy.
 
 ## Run locally
 
@@ -29,12 +29,8 @@ Then visit `http://127.0.0.1:4173`.
 
 ## Data and privacy
 
-This GitHub Pages app has no server-side database. Device profiles and learner content use browser IndexedDB. Data stays on the current browser/device unless the learner exports it.
-
-## GitHub Pages
-
-Publish the root of the `main` branch with GitHub Pages.
+Progress, stream choice, checklist ticks, lab mastery, simulator answers, and boss trial state are stored in browser `localStorage`. There is no server-side database.
 
 ## Disclaimer
 
-This is an independent study aid. It is not affiliated with, sponsored by, or endorsed by SAP. It does not reproduce SAP's proprietary exam environment or confidential exam items. Certification scope can change; verify details on the official SAP Learning certification page. SAP and SAP HANA are trademarks or registered trademarks of SAP SE or its affiliates; names are used only to identify the study subject.
+This is an independent study aid. It is not affiliated with, sponsored by, or endorsed by SAP. It does not reproduce SAP's proprietary exam environment or confidential exam items. Certification scope can change; verify details on official SAP Learning and SAP Help pages.

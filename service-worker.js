@@ -1,4 +1,4 @@
-const CACHE = "sap-spellbook-v1";
+const CACHE = "sap-spellbook-academy-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,19 +6,20 @@ const ASSETS = [
   "./app.js",
   "./icon.svg",
   "./manifest.webmanifest",
-  "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf"
+  "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf",
+  "./assets/Sprint_2_Part_2_Self_Service_Migration_SAP_HANA_Cloud.docx",
+  "./assets/Sprint_2_Part_3_SAP_HANA_Installation_and_Administration_All_Lessons.docx",
+  "./assets/Sprint_2_SAP_HANA_Cloud_Study_Notes.pdf"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => {
-      return Promise.all(
-        ASSETS.map(async (asset) => {
-          const response = await fetch(new Request(asset, { cache: "reload" }));
-          if (response.ok) await cache.put(asset, response);
-        })
-      );
-    })
+    caches.open(CACHE).then((cache) => Promise.all(
+      ASSETS.map(async (asset) => {
+        const response = await fetch(new Request(asset, { cache: "reload" }));
+        if (response.ok) await cache.put(asset, response);
+      })
+    ))
   );
   self.skipWaiting();
 });

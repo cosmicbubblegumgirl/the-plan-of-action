@@ -1,11 +1,11 @@
 {
-  "name": "The SAP Spellbook",
-  "short_name": "SAP Spellbook",
-  "description": "Unofficial C_CPI_2601 study planner and system-based assessment simulator made by a learner for learners.",
+  "name": "SAP Spellbook Academy",
+  "short_name": "Spellbook Academy",
+  "description": "Unofficial two-stream SAP certification practice academy for Integration Developer and Database Administrator - SAP HANA learners.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#1f1442",
-  "theme_color": "#6d45d7",
+  "background_color": "#17161d",
+  "theme_color": "#1ab2a8",
   "icons": [
     {
       "src": "./icon.svg",

@@ -1,949 +1,424 @@
 (() => {
   "use strict";
 
-  const DB_NAME = "the-plan-of-action";
-  const DB_VERSION = 1;
-  const APP_NAME = "The SAP Spellbook";
-  const ACTIVE_PROFILE_KEY = "poa-active-profile";
-  const THEME_KEY = "poa-theme";
-  const THREE_HOURS = 3 * 60 * 60 * 1000;
-  const RUNBOOK_PDF_PATH = "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf";
-  const HANA_FEEDBACK_COPY = {
-    pass: "Looks right. It matches the runbook checks.",
-    fail: "Not quite yet. Add the missing build details, and remove anything that does not belong in this step."
-  };
+  const STORAGE_KEY = "sap-spellbook-academy-v2";
+  const STREAM_KEY = "sap-spellbook-active-stream-v2";
+  const THEME_KEY = "sap-spellbook-theme-v2";
+  const BOSS_SECONDS = 3 * 60 * 60;
 
-  const pageMeta = {
-    dashboard: ["Spell Desk", "Workspace / Spell Desk"],
-    roadmap: ["Quest Map", "Workspace / Quest Map"],
-    simulator: ["Spell Simulator", "Workspace / Spell Simulator"],
-    hana: ["HANA Potion Lab", "Workspace / HANA Potion Lab"],
-    questions: ["The SAP Oracle", "Workspace / The SAP Oracle"],
-    walkthroughs: ["Guided Scrolls", "Workspace / Guided Scrolls"],
-    landmarks: ["Milestone Moons", "Progress / Milestone Moons"],
-    checklist: ["Potion Checklist", "Progress / Potion Checklist"],
-    notes: ["Spellbook Notes", "Progress / Spellbook Notes"],
-    mock: ["Final Boss Trial", "Assessment / Final Boss Trial"]
-  };
+  const sections = [
+    ["dashboard", "Spell Desk", "dashboard"],
+    ["grimoire", "Practice Grimoire", "book"],
+    ["roadmap", "Quest Map", "map"],
+    ["library", "Arcane Library", "library"],
+    ["labs", "Potion Labs", "flask"],
+    ["charms", "Debugging Charms", "spark"],
+    ["simulator", "Spell Simulator", "wand"],
+    ["boss", "Final Boss Trial", "timer"],
+    ["checklist", "Moonstone Checklist", "check"]
+  ];
 
   const icons = {
-    dashboard: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4zm10 0h6v10h-6zM4 14h6v6H4zm10 4h6v2h-6z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-    roadmap: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3v18M6 6h9l-2 3 2 3H6m0 5h11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    lab: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 17l-5-9V3M7.5 14h9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    hana: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 3-7 3-7-1.3-7-3Zm0 0v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    questions: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H7a3 3 0 0 0-3 3zm0 0V21m5-13h7m-7 4h5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    steps: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h14M3 6h.01M3 12h.01M3 18h.01" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    landmark: '<svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
-    checklist: '<svg viewBox="0 0 24 24" fill="none"><path d="m4 6 2 2 3-4M12 6h8M4 13l2 2 3-4m3 2h8M4 20l2 2 3-4m3 2h8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    notes: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 3h11l3 3v15H5zm10 0v4h4M8 11h8m-8 4h8m-8 4h5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    timer: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke-width="1.8"/><path d="M9 3h6m-3 3v7l4 2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    dashboard: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zm9 0h7v10h-7zM4 13h7v7H4zm9 3h7v4h-7z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    book: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5c4-2 6.7-1.2 8 1.1 1.3-2.3 4-3.1 8-1.1v14c-4-1.6-6.7-.9-8 1.1-1.3-2-4-2.7-8-1.1zM12 6.6v14" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    map: '<svg viewBox="0 0 24 24" fill="none"><path d="m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2zm5-2v14m6-12v14" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    library: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4h5v16H5zm7 0h4v16h-4zm6 1 2 14m-15-4h15" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    flask: '<svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 17l-5-9V3M7.5 14h9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    spark: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 9.7 9.7 3 12l6.7 2.3L12 21l2.3-6.7L21 12l-6.7-2.3zM5 5l2 2m10 10 2 2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    wand: '<svg viewBox="0 0 24 24" fill="none"><path d="m4 20 10-10m-1-5 1-2 1 2 2 1-2 1-1 2-1-2-2-1zm6 7 1-2 1 2 2 1-2 1-1 2-1-2-2-1z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    timer: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke-width="1.8"/><path d="M9 3h6m-3 4v6l4 2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6M4 20h16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.8" stroke-linecap="round"/></svg>',
     moon: '<svg viewBox="0 0 24 24" fill="none"><path d="M20 15.3A8 8 0 0 1 8.7 4a8 8 0 1 0 11.3 11.3Z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
     sun: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke-width="1.8"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    chevron: '<svg viewBox="0 0 24 24" fill="none"><path d="m8 10 4 4 4-4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    close: '<svg viewBox="0 0 24 24" fill="none"><path d="m6 6 12 12M18 6 6 18" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    search: '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke-width="1.8"/><path d="m16.5 16.5 4 4" stroke-width="1.8" stroke-linecap="round"/></svg>',
-    arrow: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    download: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m-4-4 4 4 4-4M5 20h14" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    plus: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke-width="1.8" stroke-linecap="round"/></svg>'
+    arrow: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-5-5 5 5-5 5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
 
-  const roadmapDays = [
-    ["Orientation and baseline", "Read the certification page, scan all five CLD900 units, and attempt ten recall questions without notes.", "60 min"],
-    ["Integration strategy", "Study distributed architecture challenges, SAP integration strategy, clean core, and API-led integration.", "75 min"],
-    ["Suite navigation", "Learn tenant roles, capabilities, system scope, lifecycle states, and the Design, Monitor, Configure, and APIs areas.", "75 min"],
-    ["API foundations", "Practice providers, proxies, resources, base paths, products, applications, and the API lifecycle.", "90 min"],
-    ["API policies", "Configure Verify API Key, Spike Arrest, Assign Message, threat protection, and fault handling.", "90 min"],
-    ["Cloud Integration basics", "Create packages and artifacts; review sender and receiver channels plus the iFlow development lifecycle.", "90 min"],
-    ["Build an integration flow", "Complete simulator tasks 1–3. Rebuild the iFlow sequence once without hints.", "105 min"],
-    ["Transform and route", "Practice converters, message mapping, Content Modifier, Camel data, Simple expressions, and routing.", "90 min"],
-    ["Security and connectivity", "Review credential aliases, OAuth2, TLS material, destinations, Cloud Connector, and adapter authentication.", "90 min"],
-    ["Runtime operations", "Trace failed messages, read MPL evidence, correct configuration, redeploy, and retry.", "90 min"],
-    ["Event-driven architecture", "Study queues, topics, subscriptions, direct versus guaranteed delivery, and loose coupling.", "90 min"],
-    ["Event Mesh practical", "Complete simulator tasks 6 and 11, then explain the configuration aloud without looking.", "90 min"],
-    ["Full mock", "Start the three-hour mock. Finish all twelve tasks and preserve at least thirty minutes for review.", "180 min"],
-    ["Repair and rehearse", "Repeat every failed task, tighten your notes, and prepare an exam-day checklist.", "90 min"]
-  ];
-
-  const systemChallenges = [
-    {
-      id: "package",
-      title: "Create an integration package",
-      domain: "Cloud Integration",
-      difficulty: "Foundation",
-      area: "Design · Integrations",
-      prompt: "Create a package for the assessment artifacts with the exact technical identifier and a meaningful description.",
-      instructions: "Name the package CERT PREP. Set the technical name to CERT_PREP_2601 and describe it as Practice artifacts for the integration developer assessment.",
-      type: "fields",
-      fields: [
-        ["name", "Package Name", "text", "CERT PREP"],
-        ["technicalName", "Technical Name", "text", "CERT_PREP_2601"],
-        ["description", "Short Description", "textarea", "Practice artifacts for the integration developer assessment"]
-      ],
-      expected: {
-        name: "CERT PREP",
-        technicalName: "CERT_PREP_2601",
-        description: "Practice artifacts for the integration developer assessment"
+  const streams = {
+    stream1: {
+      label: "Stream 1 Certification",
+      shortLabel: "Stream 1",
+      certification: "Integration Developer",
+      grimoire: "The Apprentice Grimoire",
+      cardTitle: "The First Grimoire",
+      button: "Open Stream 1 Spellbook",
+      accent: "mint",
+      summary: "Begin your first certification path here. This stream keeps the current Integration Developer study build and turns it into the first spellbook.",
+      desk: {
+        today: "Build and deploy one integration flow without looking at notes.",
+        quest: "Cloud Integration -> API Management -> Event Mesh",
+        reminder: "Exact aliases, base paths, rates, and topic names matter.",
+        hourglass: "3 hour final boss"
       },
-      hint: "Technical identifiers are exact. Keep the human-readable name separate from the technical name."
-    },
-    {
-      id: "iflow",
-      title: "Assemble an integration flow",
-      domain: "Cloud Integration",
-      difficulty: "Core",
-      area: "Design · Integration Flow",
-      prompt: "Construct the processing sequence for an HTTPS-to-HTTP sales-order integration.",
-      instructions: "Select the six components in the order they should execute after the sender receives the message.",
-      type: "sequence",
-      options: ["HTTPS Sender", "Content Modifier", "JSON to XML Converter", "Message Mapping", "Request Reply", "HTTP Receiver"],
-      expected: ["HTTPS Sender", "Content Modifier", "JSON to XML Converter", "Message Mapping", "Request Reply", "HTTP Receiver"],
-      hint: "Think sender channel, message enrichment, format conversion, transformation, synchronous call, then receiver channel."
-    },
-    {
-      id: "camel",
-      title: "Set a Camel Simple expression",
-      domain: "Cloud Integration",
-      difficulty: "Core",
-      area: "Design · Content Modifier",
-      prompt: "Create a message header named SourceSystem from the inbound header X-Source-System.",
-      instructions: "Choose the expression that reads the inbound Camel header.",
-      type: "single",
-      options: [
-        ["${header.X-Source-System}", "Read the inbound header directly."],
-        ["${property.X-Source-System}", "Read an exchange property."],
-        ["{{header.X-Source-System}}", "Resolve an externalized parameter."],
-        ["#{header:X-Source-System}", "Use a non-Camel expression syntax."]
+      questMap: [
+        ["Prophecy Reading", "Confirm the current SAP Certified - Integration Developer scope and the practical exam style.", "45 min"],
+        ["Clean-Core Compass", "Explain why released APIs and events keep the ERP core upgrade-safe.", "50 min"],
+        ["Integration Suite Gates", "Map Design, Monitor, Configure, API, and Event Mesh areas to real tasks.", "60 min"],
+        ["Package Forge", "Create a governed integration package and iFlow with exact technical naming.", "75 min"],
+        ["iFlow Casting", "Build HTTPS sender, Content Modifier, converter, mapping, Request Reply, and HTTP receiver.", "90 min"],
+        ["API Shieldcraft", "Create provider, proxy, product, and policies for Verify API Key and Spike Arrest.", "90 min"],
+        ["Event Mesh Channeling", "Create a durable queue and exact topic subscription.", "75 min"],
+        ["Runtime Divination", "Use message processing logs to isolate the first meaningful error.", "60 min"],
+        ["Security Sigils", "Deploy credential aliases and bind them without exposing secrets in the design.", "60 min"],
+        ["Mock Arena", "Complete a timed attempt with no hints and thirty minutes reserved for review.", "180 min"]
       ],
-      expected: 0,
-      hint: "Camel Simple accesses headers through the header namespace."
-    },
-    {
-      id: "apiPolicies",
-      title: "Protect an API proxy",
-      domain: "API Management",
-      difficulty: "Core",
-      area: "APIs · Policy Editor",
-      prompt: "Secure an Orders API against unauthorized calls and sudden traffic bursts.",
-      instructions: "Select exactly two policies: one must verify a consumer credential and one must limit burst traffic.",
-      type: "multi",
-      options: [
-        ["Verify API Key", "Validate the application key supplied by the caller."],
-        ["Spike Arrest", "Smooth or limit traffic rates."],
-        ["Assign Message", "Create or alter message content."],
-        ["XML Threat Protection", "Limit XML structural complexity."]
+      library: [
+        ["Integration Stream Scrolls", "Official learning journey", "Developing with SAP Integration Suite, including APIs, Cloud Integration, and process modeling.", "https://learning.sap.com/learning-journeys/developing-with-sap-integration-suite"],
+        ["Certification Prophecy", "Official certification page", "Current SAP Certified - Integration Developer certification landing page.", "https://learning.sap.com/certifications/sap-certified-associate-integration-developer"],
+        ["Practical Exam Guide", "SAP Learning help", "SAP practical certification setup, launch, attempts, and preparation guidance.", "https://learning.sap.com/helpcenter/certification-support/step-by-step-guide-practical-exams"],
+        ["Local HANA SyBA Runbook", "Bundled PDF", "Existing PDF asset retained from the current site for cross-skill database practice.", "./assets/SAP_HANA_SyBA_Practice_Build_Runbook.pdf"]
       ],
-      expected: [0, 1],
-      hint: "The requirement describes authentication plus traffic protection, not message construction."
-    },
-    {
-      id: "security",
-      title: "Deploy security material",
-      domain: "Cloud Integration",
-      difficulty: "Core",
-      area: "Monitor · Security Material",
-      prompt: "Create the credential referenced by the HTTP receiver adapter.",
-      instructions: "Use User Credentials named ORDER_API for user integration_user. A practice password of ExamReady! is expected by this simulator.",
-      type: "fields",
-      fields: [
-        ["type", "Security Material Type", "select", "User Credentials", ["User Credentials", "OAuth2 Client Credentials", "Secure Parameter"]],
-        ["name", "Name", "text", "ORDER_API"],
-        ["username", "User", "text", "integration_user"],
-        ["password", "Password", "password", "ExamReady!"]
+      tasks: [
+        {
+          name: "Forge the Integration Package",
+          difficulty: "Foundation",
+          time: "15 min",
+          source: "Stream 1 current site content; SAP Integration Suite learning journey",
+          prophecy: "Create a governed integration package with a readable name, exact technical identifier, and useful description.",
+          ingredients: ["SAP Integration Suite tenant", "Design access", "Package naming convention", "Version note"],
+          route: "Integration Suite -> Design -> Integrations -> Create",
+          steps: ["Open the Design area.", "Choose Create package.", "Enter CERT PREP as the display name.", "Set CERT_PREP_2601 as the technical name.", "Save and confirm the package is visible."],
+          code: "Package Name: CERT PREP\nTechnical Name: CERT_PREP_2601\nDescription: Practice artifacts for the integration developer assessment",
+          translation: ["Display names are for humans.", "Technical names are exact and often validated.", "Descriptions should explain the business purpose."],
+          finished: "Package exists, opens cleanly, and is ready for artifacts.",
+          blank: "Package Name: ______\nTechnical Name: ______\nDescription: ______",
+          proof: "Reopen the package from Design and verify the exact technical name.",
+          traps: ["Using spaces in the technical identifier", "Creating the package in the wrong tenant"],
+          counter: "Rename or recreate the package before building artifacts inside it."
+        },
+        {
+          name: "Cast the HTTPS-to-HTTP iFlow",
+          difficulty: "Core",
+          time: "40 min",
+          source: "Stream 1 current site content; SAP Integration Suite learning journey",
+          prophecy: "Build a synchronous flow that accepts JSON, enriches headers, maps the payload, and calls a protected receiver.",
+          ingredients: ["HTTPS sender", "Content Modifier", "JSON to XML converter", "Message Mapping", "Request Reply", "HTTP receiver"],
+          route: "Integration Suite -> Design -> Package -> Integration Flow",
+          steps: ["Add the HTTPS sender.", "Set the inbound resource path.", "Create correlation headers in Content Modifier.", "Convert JSON to XML before mapping.", "Call the receiver through Request Reply.", "Deploy and test."],
+          code: "HTTPS Sender -> Content Modifier -> JSON to XML Converter -> Message Mapping -> Request Reply -> HTTP Receiver",
+          translation: ["The sender opens the endpoint.", "The modifier enriches metadata.", "The converter makes XML mapping possible.", "Request Reply performs the synchronous receiver call."],
+          finished: "The deployed iFlow receives a test message and returns the receiver response.",
+          blank: "Sender -> ______ -> Converter -> ______ -> Request Reply -> ______",
+          proof: "Open Message Processing and confirm the test exchange completed.",
+          traps: ["Mapping before conversion", "Deploying before security material exists"],
+          counter: "Move the steps into the expected order and redeploy only after required configuration is complete."
+        },
+        {
+          name: "Raise the API Shield",
+          difficulty: "Core",
+          time: "35 min",
+          source: "Stream 1 current site content; SAP Integration Suite learning journey",
+          prophecy: "Protect an Orders API with consumer credentials and burst control.",
+          ingredients: ["API provider", "API proxy", "Verify API Key policy", "Spike Arrest policy", "API product"],
+          route: "Integration Suite -> API Management -> APIs",
+          steps: ["Create or select the API provider.", "Create a versioned API proxy.", "Attach Verify API Key in request flow.", "Attach Spike Arrest with the requested rate.", "Deploy and publish through a product."],
+          code: "Request PreFlow:\n  Verify API Key\n  Spike Arrest",
+          translation: ["Verify API Key checks consumer identity.", "Spike Arrest smooths or limits sudden bursts.", "The product exposes the proxy for controlled consumption."],
+          finished: "Calls without a valid key fail; calls with an approved key pass within the rate limit.",
+          blank: "Policy 1: ______\nPolicy 2: ______\nBase Path: ______",
+          proof: "Send one request without the key and one with the key; compare responses.",
+          traps: ["Putting policies on the wrong flow", "Forgetting to publish the product"],
+          counter: "Move policies to request PreFlow and retest with a subscribed application key."
+        },
+        {
+          name: "Bind the Event Queue",
+          difficulty: "Core",
+          time: "30 min",
+          source: "Stream 1 current site content; SAP Integration Suite learning journey",
+          prophecy: "Create a durable queue and subscribe it to the exact business event topic.",
+          ingredients: ["Event Mesh access", "Queue name", "Topic string", "Redelivery policy"],
+          route: "Integration Suite -> Configure -> Event Mesh",
+          steps: ["Create queue orders.created.q.", "Use non-exclusive access for shared consumers.", "Set maximum redelivery to 3.", "Add the exact topic subscription.", "Publish a sample event."],
+          code: "Queue: orders.created.q\nAccess: NON_EXCLUSIVE\nMax Redelivery: 3\nTopic: sap/s4/beh/salesorder/v1/SalesOrder/Created/v1",
+          translation: ["The topic routes events.", "The queue stores messages.", "Redelivery defines retry behavior."],
+          finished: "A sample SalesOrder Created event lands in the queue.",
+          blank: "Queue: ______\nAccess: ______\nTopic: ______",
+          proof: "Open the queue and confirm the message count changes after publishing.",
+          traps: ["Changing topic case", "Using an exclusive queue when multiple consumers are expected"],
+          counter: "Correct the exact topic and replay a representative event."
+        }
       ],
-      expected: {
-        type: "User Credentials",
-        name: "ORDER_API",
-        username: "integration_user",
-        password: "ExamReady!"
+      charms: [
+        ["Receiver returns 401", "The credential alias is missing, misspelled, or has the wrong secret.", "Deploy or correct the security material alias, then retest from Message Processing.", "New MPL shows receiver call completed.", "Security Sigils"],
+        ["Mapping fails after JSON input", "The message is still JSON when XML-based mapping runs.", "Place JSON to XML Converter before Message Mapping.", "Mapping step completes with the expected target payload.", "iFlow Casting"],
+        ["API key policy blocks every call", "The app is not subscribed to the product or the key is sent under the wrong header/query name.", "Subscribe the app, copy the correct key, and send it in the expected location.", "Authorized request succeeds while missing-key request fails.", "API Shieldcraft"],
+        ["Event queue remains empty", "The topic subscription does not match the producer topic.", "Compare the topic path character by character and fix case or version segments.", "Published test event appears in the queue.", "Event Queue"]
+      ],
+      simulator: [
+        ["Which step should run before XML message mapping when the sender sends JSON?", ["Request Reply", "JSON to XML Converter", "Spike Arrest", "API Product"], 1, "XML message mapping expects XML input."],
+        ["Which two API policies match authentication plus burst protection?", ["Assign Message and XML Threat Protection", "Verify API Key and Spike Arrest", "OAuth Bearer and Content Modifier", "CORS and Message Mapping"], 1, "Verify API Key checks consumers; Spike Arrest controls bursts."],
+        ["A log warns that ORDER_API was not found, then the receiver returns 401. What should you fix first?", ["The message mapping", "The receiver credential alias", "The Event Mesh queue", "The API product"], 1, "The earliest warning points to missing security material."],
+        ["Clean-core integration usually prefers which pattern?", ["Modify unreleased ERP tables directly", "Use released APIs or business events", "Copy database tables nightly without contracts", "Disable governance for speed"], 1, "Released contracts reduce upgrade friction."]
+      ],
+      checklist: [
+        ["Readiness", "I can explain the certification scope from the official SAP page."],
+        ["Readiness", "I can complete an iFlow build without looking."],
+        ["Readiness", "I can explain each policy and adapter choice."],
+        ["Readiness", "I can fill in the blank spell scrolls for package, iFlow, API, and queue tasks."],
+        ["Verification", "I can use Message Processing logs to prove a run worked."],
+        ["Verification", "I can name the first error, root cause, and counter-spell."],
+        ["Final Boss", "I have completed one three-hour no-hints attempt."],
+        ["Final Boss", "I reserved final review time for exact values and deployment status."]
+      ]
+    },
+    stream2: {
+      label: "Stream 2 Certification",
+      shortLabel: "Stream 2",
+      certification: "Database Administrator - SAP HANA",
+      grimoire: "The Cloud Mage Grimoire",
+      cardTitle: "The Second Grimoire",
+      button: "Open Stream 2 Spellbook",
+      accent: "gold",
+      summary: "Enter the advanced certification path focused on SAP HANA Cloud, SAP BTP access, Integration Suite context, migration, installation, administration, monitoring, security, SQL practice, and system-based exam prep.",
+      desk: {
+        today: "Choose the correct HANA admin tool for five tasks.",
+        quest: "BTP access -> HANA Cloud ops -> migration -> security",
+        reminder: "Cloud Central handles instance operations; cockpit handles database administration; Database Explorer handles SQL and catalog work.",
+        hourglass: "3 hour final boss"
       },
-      hint: "The adapter resolves the credential by its deployed material name."
-    },
-    {
-      id: "eventQueue",
-      title: "Configure an Event Mesh queue",
-      domain: "Event Mesh",
-      difficulty: "Core",
-      area: "Configure · Event Mesh",
-      prompt: "Create a durable queue for the SAP S/4HANA Sales Order Created business event.",
-      instructions: "Create queue orders.created.q with NON_EXCLUSIVE access, maximum redelivery 3, and the exact topic subscription shown.",
-      type: "fields",
-      fields: [
-        ["queue", "Queue Name", "text", "orders.created.q"],
-        ["access", "Access Type", "select", "NON_EXCLUSIVE", ["NON_EXCLUSIVE", "EXCLUSIVE"]],
-        ["redelivery", "Max Redelivery", "number", "3"],
-        ["topic", "Topic Subscription", "textarea", "sap/s4/beh/salesorder/v1/SalesOrder/Created/v1"]
+      questMap: [
+        ["The Prophecy", "Read the certification page and pin down the Database Administrator - SAP HANA role.", "45 min"],
+        ["BTP Gatekeeping", "Compare enterprise, trial, and free tier access; verify entitlements and role collections.", "70 min"],
+        ["Tool Triangle", "Master Cloud Central, HANA cockpit, and Database Explorer responsibilities.", "60 min"],
+        ["Provisioning Ritual", "Plan region, memory, storage, availability zone, replicas, data lake, and key management choices.", "90 min"],
+        ["SQL Rune Bench", "Use SQL Console, Statement Library, catalog objects, imports, and trace files.", "80 min"],
+        ["Lifecycle Ward", "Start, stop, upgrade, back up, recover, and verify HANA Cloud instances.", "90 min"],
+        ["Resilience Sigils", "Study replicas, scaling, resource monitoring, workload classes, and Elastic Compute Nodes.", "80 min"],
+        ["Security Circle", "Configure auditing, users, user groups, roles, privileges, and least privilege.", "90 min"],
+        ["Migration Portal", "Plan self-service migration projects and compatibility checks.", "90 min"],
+        ["On-Premises Bridge", "Prepare Cloud Connector, virtual host and port, location ID, migration user, and rollback plan.", "90 min"],
+        ["Installation Forge", "Review sizing, hardware, Linux requirements, hdblcm, cockpit, tenants, and post-install checks.", "110 min"],
+        ["Final Boss Rehearsal", "Run a no-hints attempt across administration, migration, SQL, backup, and security tasks.", "180 min"]
       ],
-      expected: {
-        queue: "orders.created.q",
-        access: "NON_EXCLUSIVE",
-        redelivery: "3",
-        topic: "sap/s4/beh/salesorder/v1/SalesOrder/Created/v1"
-      },
-      hint: "The topic path is case-sensitive; queue names conventionally use lower case and dots."
-    },
-    {
-      id: "monitor",
-      title: "Diagnose a failed message",
-      domain: "Operations",
-      difficulty: "Core",
-      area: "Monitor · Message Processing",
-      prompt: "A previously working iFlow now fails at the receiver. Use the message processing log to identify the first corrective action.",
-      instructions: "Review the log and choose the most direct fix.",
-      type: "log-single",
-      log: `[INFO] HTTPS sender accepted POST /orders
-[INFO] JSON to XML conversion completed
-[INFO] Message mapping completed
-[WARN] Security material alias ORDER_API was not found
-[ERROR] HTTP receiver returned 401 Unauthorized
-[ERROR] Message processing failed`,
-      options: [
-        ["Deploy or correct ORDER_API security material", "Fix the missing credential alias referenced by the receiver."],
-        ["Replace the JSON to XML converter", "Change the successful conversion step."],
-        ["Increase Event Mesh redelivery count", "Change an unrelated messaging setting."],
-        ["Remove the HTTPS sender", "Remove the inbound endpoint."]
+      library: [
+        ["HANA Cloud Rune Book", "Uploaded PDF", "Sprint 2 SAP HANA Cloud study notes with account access, tool split, lifecycle, monitoring, ECN, and security.", "./assets/Sprint_2_SAP_HANA_Cloud_Study_Notes.pdf"],
+        ["Migration Potion Manual", "Uploaded DOCX", "Self-Service Migration for SAP HANA Cloud, including on-premises, Neo, Cloud Foundry, validation, and Alert Notification.", "./assets/Sprint_2_Part_2_Self_Service_Migration_SAP_HANA_Cloud.docx"],
+        ["Installation and Admin Spellbook", "Uploaded DOCX", "SAP HANA installation and administration lessons covering sizing, Linux, hdblcm, cockpit, tenants, backup, recovery, and security.", "./assets/Sprint_2_Part_3_SAP_HANA_Installation_and_Administration_All_Lessons.docx"],
+        ["Official HANA Certification", "SAP Learning", "SAP Certified - Database Administrator - SAP HANA certification page.", "https://learning.sap.com/certifications/sap-certified-associate-database-administrator-sap-hana"],
+        ["HANA Cloud Admin Guide", "SAP Help", "Official SAP HANA Cloud database administration guide.", "https://help.sap.com/docs/hana-cloud-database/sap-hana-cloud-sap-hana-database-administration-guide/sap-hana-cloud-sap-hana-database-administration-guide"],
+        ["HANA Cloud Tools", "SAP Help", "SAP HANA Cloud Central, SAP HANA cockpit, and SAP HANA database explorer subscription guidance.", "https://help.sap.com/docs/hana-cloud/sap-hana-cloud-administration-guide/subscribing-to-sap-hana-cloud-administration-tools"],
+        ["Integration Bridge Scroll", "SAP Learning", "Integration Suite context for BTP administrators who need cross-platform fluency.", "https://learning.sap.com/learning-journeys/developing-with-sap-integration-suite"]
       ],
-      expected: 0,
-      hint: "Start with the earliest warning that explains the receiver's authorization failure."
-    },
-    {
-      id: "mapping",
-      title: "Complete a message mapping",
-      domain: "Cloud Integration",
-      difficulty: "Core",
-      area: "Design · Message Mapping",
-      prompt: "Map the source sales-order fields to the target purchase-order structure.",
-      instructions: "Enter the target element for each source field.",
-      type: "mapping",
-      rows: [
-        ["OrderNumber", "PurchaseOrderID"],
-        ["Customer", "BuyerID"],
-        ["Amount", "NetAmount"]
+      tasks: [
+        {
+          name: "Choose the Correct Admin Tool",
+          difficulty: "Foundation",
+          time: "20 min",
+          source: "Uploaded HANA Cloud Study Notes, Module 3; SAP Help administration tools",
+          prophecy: "Route each task to Cloud Central, HANA cockpit, or Database Explorer.",
+          ingredients: ["SAP BTP cockpit", "SAP HANA Cloud Central", "HANA cockpit", "Database Explorer"],
+          route: "BTP Cockpit -> Subaccount -> Instances and Subscriptions -> SAP HANA Cloud Central",
+          steps: ["Use Cloud Central for instance lifecycle and monitoring.", "Use HANA cockpit for database-level monitoring, backups, users, roles, and configuration.", "Use Database Explorer for SQL, catalog browsing, imports, trace files, and statement library work."],
+          code: "Cloud Central = instance operations\nHANA cockpit = database administration\nDatabase Explorer = SQL and catalog work",
+          translation: ["Instance operations happen above the database.", "Cockpit sees database health and administration objects.", "Database Explorer is the SQL workbench."],
+          finished: "You can explain the tool split without hesitation.",
+          blank: "Stop/start instance: ______\nCreate audit policy: ______\nRun SQL query: ______",
+          proof: "Given five tasks, map each to the correct tool and justify the route.",
+          traps: ["Opening Database Explorer for instance scaling", "Using Cloud Central when the task asks for SQL/catalog evidence"],
+          counter: "Ask whether the task is instance-level, database-level, or SQL/catalog-level."
+        },
+        {
+          name: "Open the BTP Gate",
+          difficulty: "Foundation",
+          time: "35 min",
+          source: "Uploaded HANA Cloud Study Notes, Modules 1-2",
+          prophecy: "Confirm account model, entitlements, and access before provisioning or migration work.",
+          ingredients: ["Global account", "Subaccount", "Entitlements", "Role collection", "Cloud Foundry org and space"],
+          route: "SAP BTP Cockpit -> Global Account -> Subaccount -> Entitlements",
+          steps: ["Identify enterprise, trial, or free tier account context.", "Verify hana, tools, and data lake service plans as needed.", "Assign SAP HANA Cloud Administrator role collection.", "Log out and back in if role changes are not visible."],
+          code: "cf login -o <organisation> -s <space> -a <API endpoint>",
+          translation: ["The org and space select the Cloud Foundry target.", "The API endpoint selects the region.", "Entitlements decide whether services can be provisioned."],
+          finished: "The learner can open Cloud Central and see the expected HANA Cloud tools.",
+          blank: "Required service plan: ______\nRole collection: ______\nCLI target: ______",
+          proof: "Cloud Central opens and the target subaccount has the expected service plans.",
+          traps: ["Confusing trial account with free tier service plan", "Forgetting to refresh permissions after role changes"],
+          counter: "Recheck entitlement assignment, role collection, and account type."
+        },
+        {
+          name: "Provision the HANA Cloud Instance",
+          difficulty: "Core",
+          time: "45 min",
+          source: "Uploaded HANA Cloud Study Notes, Module 4; SAP Help administration guide",
+          prophecy: "Plan a SAP HANA Cloud instance with size, availability, data lake, and administration options.",
+          ingredients: ["Memory", "Storage", "Region", "Availability zone", "Replica choice", "Data lake decision", "Backup and key management notes"],
+          route: "Cloud Central -> Create Instance -> SAP HANA Database",
+          steps: ["Choose deployment method.", "Set memory, storage, and performance class.", "Choose region and availability zone.", "Decide on replicas and data lake.", "Review backup, cloud connector, and key management options.", "Create and monitor status."],
+          code: "{\n  \"memory\": \"<GB>\",\n  \"storage\": \"<GB>\",\n  \"availabilityZone\": \"<zone>\",\n  \"replicas\": \"<strategy>\",\n  \"dataLake\": \"<integrated-or-standalone>\"\n}",
+          translation: ["Memory and storage shape cost and capacity.", "Availability options shape resilience.", "Data lake choices shape storage tiering and large-scale data."],
+          finished: "Instance is created with documented sizing and availability decisions.",
+          blank: "Region: ______\nMemory: ______\nStorage: ______\nReplica strategy: ______",
+          proof: "Cloud Central shows the instance status and chosen capacity.",
+          traps: ["Provisioning before entitlement checks", "Choosing region without checking data residency or app proximity"],
+          counter: "Stop and write the provisioning decision sheet before pressing Create."
+        },
+        {
+          name: "Cast the SQL Console Runes",
+          difficulty: "Core",
+          time: "40 min",
+          source: "Uploaded HANA Cloud Study Notes, Modules 5-6",
+          prophecy: "Create a schema and table in Database Explorer, then validate the catalog evidence.",
+          ingredients: ["Database Explorer", "SQL Console", "Schema selector", "Catalog browser"],
+          route: "Cloud Central -> Instance actions -> Open Database Explorer",
+          steps: ["Open Database Explorer.", "Select the target instance.", "Open SQL Console.", "Run the schema and table statements.", "Inspect the catalog object and row count."],
+          code: "CREATE SCHEMA \"HC200_SCHEMA\";\n\nCREATE COLUMN TABLE \"HC200_SCHEMA\".\"HC200_DEMO\" (\n  \"ID\" INTEGER,\n  \"NOTE\" NVARCHAR(120)\n);",
+          translation: ["The schema groups the objects.", "The column table stores demo data in HANA columnar form.", "Quoted identifiers preserve exact case."],
+          finished: "Schema and table exist in the catalog.",
+          blank: "CREATE SCHEMA ______;\nCREATE COLUMN TABLE ______ ( ... );",
+          proof: "Catalog browser shows HC200_SCHEMA.HC200_DEMO.",
+          traps: ["Running in the wrong database connection", "Using a table name that does not match the required case"],
+          counter: "Check the selected instance and schema before every statement."
+        },
+        {
+          name: "Seal Backup and Recovery Evidence",
+          difficulty: "Core",
+          time: "45 min",
+          source: "Uploaded HANA Cloud Study Notes, Module 7; uploaded Installation and Admin lessons",
+          prophecy: "Explain automatic backups, log backups, retention, and point-in-time recovery target selection.",
+          ingredients: ["Backup catalog", "Recovery point", "RPO/RTO", "Root-cause notes"],
+          route: "Cloud Central or HANA cockpit -> Backup and Recovery",
+          steps: ["Confirm automatic backup policy.", "Check data backup and log backup cadence.", "Choose a recovery time before the incident.", "Investigate root cause before recovery.", "Record validation steps after restore."],
+          code: "Daily complete data backup\nLog and catalog backups every 15 minutes\nDefault retention commonly 14 days\nRecovery target = timestamp before the damaging event",
+          translation: ["Data backups provide restore baselines.", "Log backups allow recovery after the baseline.", "Point-in-time recovery must avoid replaying the bad change."],
+          finished: "You can choose the right recovery target and explain why.",
+          blank: "RPO: ______\nRTO: ______\nRecovery target: ______",
+          proof: "A recovery plan states the target time, backup evidence, validation, and root cause.",
+          traps: ["Recovering to a time after the mistake", "Treating system replication as a backup replacement"],
+          counter: "Pick the timestamp before the incident and keep backup and HA concepts separate."
+        },
+        {
+          name: "Open the Migration Portal",
+          difficulty: "Advanced",
+          time: "60 min",
+          source: "Uploaded Self-Service Migration for SAP HANA Cloud",
+          prophecy: "Create a migration project and prepare the required source, target, and connectivity evidence.",
+          ingredients: ["Migration project", "Source type", "Migration user", "Cloud Connector mapping", "Target database credentials", "Compatibility check"],
+          route: "Cloud Central -> Migrations -> Create Migration Project",
+          steps: ["Select source type.", "Enter project metadata.", "Provide source and target connection details.", "Run compatibility check.", "Resolve Critical findings.", "Execute, validate, and finalize."],
+          code: "Compatibility severity:\nCritical = blocks continuation\nError = object will not migrate\nWarning = behavior may change\nInfo = review only",
+          translation: ["The compatibility check protects the migration window.", "Critical findings must be resolved.", "Warnings need review and acceptance or remediation."],
+          finished: "Migration project can reach source and target and has no unresolved blockers.",
+          blank: "Source type: ______\nVirtual host/port: ______\nLocation ID: ______\nMigration user: ______",
+          proof: "Compatibility report is clean enough to proceed and validation plan is written.",
+          traps: ["Using a personal admin instead of a dedicated migration user", "Skipping Cloud Connector mapping for on-premises sources"],
+          counter: "Create a scoped migration user and confirm virtual host, port, and location ID before execution."
+        },
+        {
+          name: "Draw the Security Circle",
+          difficulty: "Core",
+          time: "45 min",
+          source: "Uploaded HANA Cloud Study Notes, Module 10; uploaded Installation and Admin lessons",
+          prophecy: "Use roles, user groups, and audit policies without confusing administration grouping with data access.",
+          ingredients: ["Standard user", "Restricted user", "User group", "Role", "Audit policy"],
+          route: "HANA cockpit or Database Explorer -> Security",
+          steps: ["Create named users instead of sharing SYSTEM.", "Grant privileges through roles.", "Use user groups for user administration delegation.", "Create audit policy for relevant actions.", "Review audit trail storage and noise."],
+          code: "CREATE AUDIT POLICY \"HC200 Demo Audit Policy\" AUDITING ALL CONNECT LEVEL INFO;\nALTER AUDIT POLICY \"HC200 Demo Audit Policy\" ENABLE;",
+          translation: ["Audit policies define what is recorded.", "Roles package privileges.", "User groups help manage users but do not grant data access."],
+          finished: "Audit policy is enabled and access uses roles rather than direct sprawl.",
+          blank: "User group controls: ______\nData access controls: ______\nAudit policy captures: ______",
+          proof: "Policy appears in audit configuration and roles show assigned privileges.",
+          traps: ["Assuming user groups grant object access", "Granting privileges directly to every user"],
+          counter: "Move data access into roles and keep groups for administration boundaries."
+        },
+        {
+          name: "Prepare the Installation Forge",
+          difficulty: "Advanced",
+          time: "70 min",
+          source: "Uploaded Installation and Administration All Lessons",
+          prophecy: "Build an installation readiness sheet for SAP HANA sizing, supported hardware, Linux, hdblcm, and post-install validation.",
+          ingredients: ["Sizing worksheet", "Supported hardware check", "Linux prerequisite list", "SID", "Instance number", "Paths", "Passwords", "hdblcm media"],
+          route: "On-premises SAP HANA host -> hdblcm",
+          steps: ["Complete sizing evidence.", "Confirm certified hardware or supported cloud design.", "Prepare Linux packages, users, time sync, hostnames, and file systems.", "Run hdblcm with planned parameters.", "Validate services, ports, tenant status, license, backups, and cockpit registration."],
+          code: "hdblcm --action=install --sid=<SID> --number=<instance> --components=server",
+          translation: ["hdblcm performs lifecycle installation tasks.", "The parameter sheet prevents improvising during install.", "Post-install validation proves the installer result is actually usable."],
+          finished: "Installation sheet is complete and post-install checks are ready.",
+          blank: "SID: ______\nInstance number: ______\nData path: ______\nLog path: ______\nPost-install check: ______",
+          proof: "Checklist includes sizing, hardware, OS, media, parameters, services, backups, monitoring, and security.",
+          traps: ["Trusting the installer success message alone", "Skipping backup/security setup after installation"],
+          counter: "Treat post-install validation as a required deliverable, not an optional cleanup step."
+        }
       ],
-      expected: {
-        OrderNumber: "PurchaseOrderID",
-        Customer: "BuyerID",
-        Amount: "NetAmount"
-      },
-      hint: "Match business meaning rather than field position."
-    },
-    {
-      id: "cleanCore",
-      title: "Choose the clean-core design",
-      domain: "Architecture",
-      difficulty: "Foundation",
-      area: "Integration Strategy",
-      prompt: "A custom approval process must react to SAP S/4HANA sales orders while minimizing upgrade friction.",
-      instructions: "Choose the design most consistent with clean-core principles.",
-      type: "single",
-      options: [
-        ["Publish a released business event and handle approval outside the ERP core", "Use stable interfaces and side-by-side logic."],
-        ["Modify standard ERP code directly", "Embed the workflow in the core."],
-        ["Read internal database tables from an external script", "Couple to unreleased internals."],
-        ["Disable upgrades after customization", "Avoid change instead of controlling it."]
+      charms: [
+        ["I opened the wrong SAP tool", "The task level was misread.", "Use Cloud Central for instance operations, cockpit for database-level monitoring/security, and Database Explorer for SQL/catalog work.", "The task route now matches the expected evidence.", "Choose the Correct Admin Tool"],
+        ["Migration compatibility check blocks me", "Critical findings remain unresolved.", "Fix Critical findings before execution; review Warning findings with owners.", "Compatibility report allows the project to continue.", "Open the Migration Portal"],
+        ["Cloud Connector source cannot be reached", "Virtual host/port, location ID, or connectivity entitlement is wrong.", "Confirm Cloud Connector mapping, location ID, and connectivity_proxy entitlement.", "Migration project can connect to source.", "Migration Portal"],
+        ["Backup evidence is not enough", "The plan relies on a UI message instead of catalog or policy evidence.", "Check backup catalog, retention, and restore target; record RPO/RTO.", "The recovery plan has backup, log, target time, and validation evidence.", "Backup and Recovery"],
+        ["User group did not grant data access", "User groups organize administration but roles and privileges control object access.", "Grant privileges through roles and assign roles to users.", "User can access intended objects only.", "Security Circle"],
+        ["ECN routing does not work", "Workload class routing was added before ECN provisioning or not removed before deprovisioning.", "Provision ECN first, then add routing; remove routing before deprovisioning.", "Workload routes to the intended compute location.", "Resilience Sigils"]
       ],
-      expected: 0,
-      hint: "Clean core favors released interfaces and decoupled extensions."
-    },
-    {
-      id: "apiLifecycle",
-      title: "Order the API lifecycle",
-      domain: "API Management",
-      difficulty: "Foundation",
-      area: "APIs · Lifecycle",
-      prompt: "Move an API from backend connectivity to consumer discovery.",
-      instructions: "Place the lifecycle actions in a sensible implementation order.",
-      type: "sequence",
-      options: ["Create API Provider", "Create API Proxy", "Add Policies", "Deploy API Proxy", "Publish API Product"],
-      expected: ["Create API Provider", "Create API Proxy", "Add Policies", "Deploy API Proxy", "Publish API Product"],
-      hint: "Connectivity comes first; consumer publication comes after a deployable, protected proxy exists."
-    },
-    {
-      id: "messaging",
-      title: "Select the messaging pattern",
-      domain: "Event Mesh",
-      difficulty: "Foundation",
-      area: "Event-Driven Architecture",
-      prompt: "One order event must be independently consumed by billing, analytics, and notification services.",
-      instructions: "Choose the best communication pattern.",
-      type: "single",
-      options: [
-        ["Publish/subscribe", "Each interested consumer receives the event through subscriptions."],
-        ["Point-to-point only", "Exactly one consumer receives each message."],
-        ["Synchronous request/reply", "The producer waits for each consumer response."],
-        ["Shared database polling", "Every consumer repeatedly queries a common table."]
+      simulator: [
+        ["Which tool should you use to run SQL and browse catalog objects?", ["SAP HANA Cloud Central", "SAP HANA database explorer", "SAP BTP account cockpit", "Cloud Connector"], 1, "Database Explorer is the SQL and catalog workbench."],
+        ["A task asks you to stop a SAP HANA Cloud instance. Which area fits best?", ["Cloud Central instance actions", "Message Processing Log", "API Management", "Statement Library only"], 0, "Cloud Central handles instance lifecycle operations."],
+        ["A migration compatibility check returns Critical findings. What is the correct response?", ["Ignore and continue", "Resolve before migration can continue", "Only document after cutover", "Treat as Info"], 1, "Critical findings block continuation."],
+        ["For an on-premises migration source, what connectivity item is specifically required?", ["API product", "Cloud Connector virtual host and port", "Event Mesh queue", "Developer Hub application"], 1, "On-premises migration needs secure BTP connectivity through Cloud Connector."],
+        ["Which statement about user groups is correct?", ["They control data access", "They replace roles", "They organize user administration but do not control data access", "They disable auditing"], 2, "Roles and privileges control access; user groups help administer users."],
+        ["What should point-in-time recovery target?", ["A time before the incident", "The latest possible timestamp even after the error", "Only the first backup ever taken", "A random log backup"], 0, "Recover to a point before the damaging event."],
+        ["What is hdblcm used for?", ["SAP HANA lifecycle installation and component operations", "API traffic limiting", "Event routing", "Only SQL query tuning"], 0, "hdblcm is the SAP HANA lifecycle management tool."],
+        ["What is a safe first action after an admin task fails?", ["Change several settings at once", "Collect symptom, time, system, logs, alerts, SQL, recent changes, and impact", "Delete the tenant", "Disable auditing"], 1, "Good troubleshooting starts with evidence."]
       ],
-      expected: 0,
-      hint: "The same event must fan out to multiple independent consumers."
-    },
-    {
-      id: "externalized",
-      title: "Externalize deployment configuration",
-      domain: "Cloud Integration",
-      difficulty: "Core",
-      area: "Design · Configuration",
-      prompt: "The receiver host differs between development, test, and production tenants.",
-      instructions: "Configure the receiver address using the expected externalized parameter syntax and default development URL.",
-      type: "fields",
-      fields: [
-        ["parameter", "Parameter Name", "text", "ReceiverHost"],
-        ["adapterValue", "HTTP Adapter Address", "text", "{{ReceiverHost}}/orders"],
-        ["defaultValue", "Default Value", "text", "https://dev.api.example.com"]
-      ],
-      expected: {
-        parameter: "ReceiverHost",
-        adapterValue: "{{ReceiverHost}}/orders",
-        defaultValue: "https://dev.api.example.com"
-      },
-      hint: "Externalized parameters are referenced with double curly braces."
-    }
-  ];
-
-  const hanaBuildTasks = [
-    {
-      id: "tenant",
-      build: "Build 1",
-      title: "Create a Tenant Database",
-      context: "SYSTEMDB",
-      tool: "SQL Console",
-      prompt: "Create tenant database TRAININGDB and leave it running.",
-      task: "Type the SQL command that creates TRAININGDB with SYSTEM user password Welcome@12345.",
-      expectedAnswer: 'CREATE DATABASE TRAININGDB SYSTEM USER PASSWORD "Welcome@12345";',
-      required: ["CREATE DATABASE TRAININGDB", "SYSTEM USER PASSWORD", "Welcome@12345"],
-      validation: ["TRAININGDB exists", "SYSTEM user password is set", "Final tenant status is running"],
-      hint: "Tenant lifecycle tasks are normally executed from SYSTEMDB."
-    },
-    {
-      id: "app-user",
-      build: "Build 2",
-      title: "Create APP_USER",
-      context: "TRAININGDB",
-      tool: "SQL Console",
-      prompt: "Create APP_USER and prevent first-login password change.",
-      task: "Type the SQL command that creates APP_USER with password Welcome@12345 and disables forced first password change.",
-      expectedAnswer: 'CREATE USER APP_USER PASSWORD "Welcome@12345" NO FORCE_FIRST_PASSWORD_CHANGE;',
-      required: ["CREATE USER APP_USER", "PASSWORD", "Welcome@12345", "NO FORCE_FIRST_PASSWORD_CHANGE"],
-      validation: ["APP_USER exists in TRAININGDB", "User is not deactivated", "Password change is not required"],
-      hint: "The NO FORCE_FIRST_PASSWORD_CHANGE clause is the usual missed part."
-    },
-    {
-      id: "app-privileges",
-      build: "Build 3",
-      title: "Assign APP_USER privileges",
-      context: "TRAININGDB",
-      tool: "SQL Console",
-      prompt: "Allow APP_USER to create objects and insert data when the task explicitly expects CREATE ANY.",
-      task: "Type the grant statement from the runbook.",
-      expectedAnswer: "GRANT CREATE ANY TO APP_USER;",
-      required: ["GRANT CREATE ANY TO APP_USER"],
-      validation: ["APP_USER has the requested privilege", "Privilege was granted in the tenant", "No unrelated user is granted"],
-      hint: "Only grant this if the task asks for it; least privilege still matters."
-    },
-    {
-      id: "customer-table",
-      build: "Build 4",
-      title: "Create CUSTOMER_MASTER",
-      context: "TRAININGDB as APP_USER",
-      tool: "SQL Console",
-      prompt: "Create CUSTOMER_MASTER with exactly four columns and the required data types.",
-      task: "Type the CREATE TABLE statement.",
-      expectedAnswer: `CREATE TABLE CUSTOMER_MASTER (
-    CUSTOMER_ID INTEGER,
-    CUSTOMER_NAME NVARCHAR(100),
-    CITY NVARCHAR(50),
-    STATUS NVARCHAR(20)
-);`,
-      required: ["CREATE TABLE CUSTOMER_MASTER", "CUSTOMER_ID INTEGER", "CUSTOMER_NAME NVARCHAR(100)", "CITY NVARCHAR(50)", "STATUS NVARCHAR(20)"],
-      validation: ["Table exists in APP_USER schema", "Column names match", "Data types and lengths match"],
-      hint: "Do not add extra columns or a primary key unless the task asks."
-    },
-    {
-      id: "customer-rows",
-      build: "Build 5",
-      title: "Insert CUSTOMER_MASTER rows",
-      context: "TRAININGDB as APP_USER",
-      tool: "SQL Console",
-      prompt: "Insert exactly the three required customer rows.",
-      task: "Type the three INSERT statements or one equivalent multi-row insert.",
-      expectedAnswer: `INSERT INTO CUSTOMER_MASTER (CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS) VALUES (1001, 'Alpha Ltd', 'London', 'Active');
-INSERT INTO CUSTOMER_MASTER (CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS) VALUES (1002, 'Beta Corp', 'Berlin', 'Active');
-INSERT INTO CUSTOMER_MASTER (CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS) VALUES (1003, 'Delta Inc', 'Paris', 'Inactive');`,
-      required: ["INSERT INTO CUSTOMER_MASTER", "1001", "Alpha Ltd", "London", "Active", "1002", "Beta Corp", "Berlin", "1003", "Delta Inc", "Paris", "Inactive"],
-      validation: ["Exactly three rows exist", "Values match case and spelling", "No test rows remain"],
-      hint: "The status values use Active and Inactive, not uppercase ACTIVE."
-    },
-    {
-      id: "active-view",
-      build: "Build 6",
-      title: "Create ACTIVE_CUSTOMERS_V",
-      context: "TRAININGDB as APP_USER",
-      tool: "SQL Console",
-      prompt: "Create a SQL view that returns only active customers.",
-      task: "Type the CREATE VIEW statement.",
-      expectedAnswer: `CREATE VIEW ACTIVE_CUSTOMERS_V AS
-SELECT CUSTOMER_ID, CUSTOMER_NAME, CITY, STATUS
-FROM CUSTOMER_MASTER
-WHERE STATUS = 'Active';`,
-      required: ["CREATE VIEW ACTIVE_CUSTOMERS_V", "FROM CUSTOMER_MASTER", "WHERE STATUS = 'Active'"],
-      validation: ["View exists in APP_USER schema", "Only status Active is returned", "Rows 1001 and 1002 are visible"],
-      hint: "The filter value is case-sensitive in the practice data."
-    },
-    {
-      id: "report-user",
-      build: "Build 7",
-      title: "Create restricted REPORT_USER",
-      context: "TRAININGDB",
-      tool: "SQL Console",
-      prompt: "Create REPORT_USER with read-only access only to APP_USER.ACTIVE_CUSTOMERS_V.",
-      task: "Type the restricted user creation and SELECT grant.",
-      expectedAnswer: `CREATE RESTRICTED USER REPORT_USER PASSWORD "Welcome@12345" NO FORCE_FIRST_PASSWORD_CHANGE;
-GRANT SELECT ON APP_USER.ACTIVE_CUSTOMERS_V TO REPORT_USER;`,
-      required: ["CREATE RESTRICTED USER REPORT_USER", "Welcome@12345", "NO FORCE_FIRST_PASSWORD_CHANGE", "GRANT SELECT ON APP_USER.ACTIVE_CUSTOMERS_V TO REPORT_USER"],
-      avoid: ["CUSTOMER_MASTER TO REPORT_USER", "CREATE USER REPORT_USER"],
-      validation: ["REPORT_USER is restricted", "SELECT granted only on the view", "User cannot modify data"],
-      hint: "Granting table access when only the view is required is a grading risk."
-    },
-    {
-      id: "backup",
-      build: "Build 8",
-      title: "Configure complete data backup",
-      context: "SYSTEMDB or cockpit backup tile",
-      tool: "SQL Console / Cockpit",
-      prompt: "Run a complete backup of TRAININGDB using prefix TRAININGDB_FULL_BACKUP.",
-      task: "Type the SQL backup command from SYSTEMDB.",
-      expectedAnswer: "BACKUP DATA FOR TRAININGDB USING FILE ('TRAININGDB_FULL_BACKUP');",
-      required: ["BACKUP DATA FOR TRAININGDB", "TRAININGDB_FULL_BACKUP"],
-      validation: ["Backup targets TRAININGDB", "Prefix matches exactly", "Backup completes before submission"],
-      hint: "Backing up SYSTEMDB with the correct-looking prefix would still be wrong."
-    },
-    {
-      id: "backup-status",
-      build: "Build 9",
-      title: "Check backup status",
-      context: "Backup catalog",
-      tool: "SQL Console / Cockpit",
-      prompt: "Verify that the latest backup with the required prefix completed successfully.",
-      task: "Type the catalog query that searches for TRAININGDB_FULL_BACKUP.",
-      expectedAnswer: `SELECT ENTRY_ID, ENTRY_TYPE_NAME, STATE_NAME, SYS_START_TIME, SYS_END_TIME
-FROM SYS.M_BACKUP_CATALOG
-WHERE DESTINATION_PATH LIKE '%TRAININGDB_FULL_BACKUP%'
-ORDER BY SYS_START_TIME DESC;`,
-      required: ["SYS.M_BACKUP_CATALOG", "DESTINATION_PATH LIKE", "TRAININGDB_FULL_BACKUP", "ORDER BY SYS_START_TIME DESC"],
-      validation: ["Catalog query uses backup prefix", "Latest entry is checked", "State is successful or completed"],
-      hint: "Do not rely only on a transient UI success message."
-    },
-    {
-      id: "cockpit-resource",
-      build: "Build 10",
-      title: "Create a cockpit resource",
-      context: "SAP HANA cockpit",
-      tool: "Cockpit UI",
-      prompt: "Register the database system as HANA_TRAINING_RESOURCE.",
-      task: "Type the resource name you must see as available in cockpit.",
-      expectedAnswer: "HANA_TRAINING_RESOURCE",
-      required: ["HANA_TRAINING_RESOURCE"],
-      validation: ["Resource name matches exactly", "Resource points to the correct system", "Resource status is available"],
-      hint: "This is a UI task; the simulator accepts the exact evidence value."
-    },
-    {
-      id: "services",
-      build: "Build 11",
-      title: "Monitor database services",
-      context: "Cockpit monitoring or SQL",
-      tool: "SQL Console / Cockpit",
-      prompt: "Verify that required HANA services are visible and running where applicable.",
-      task: "Type the service monitoring query.",
-      expectedAnswer: `SELECT DATABASE_NAME, HOST, SERVICE_NAME, ACTIVE_STATUS, SQL_PORT
-FROM SYS.M_SERVICES
-ORDER BY DATABASE_NAME, SERVICE_NAME;`,
-      required: ["SYS.M_SERVICES", "DATABASE_NAME", "SERVICE_NAME", "ACTIVE_STATUS", "ORDER BY DATABASE_NAME, SERVICE_NAME"],
-      validation: ["nameserver is checked", "indexserver is checked", "Optional services are treated by version"],
-      hint: "xsengine can be optional depending on the HANA version."
-    },
-    {
-      id: "parameter",
-      build: "Build 12",
-      title: "Change a database parameter",
-      context: "Correct layer and scope",
-      tool: "SQL Console / Cockpit",
-      prompt: "Change global_allocation_limit in global.ini at the required scope.",
-      task: "Type the parameter-change template from the runbook using <VALUE_FROM_TASK>.",
-      expectedAnswer: `ALTER SYSTEM ALTER CONFIGURATION ('global.ini', 'SYSTEM')
-SET ('memorymanager', 'global_allocation_limit') = '<VALUE_FROM_TASK>'
-WITH RECONFIGURE;`,
-      required: ["ALTER SYSTEM ALTER CONFIGURATION", "global.ini", "SYSTEM", "memorymanager", "global_allocation_limit", "WITH RECONFIGURE"],
-      validation: ["File is global.ini", "Section is memorymanager", "Key is global_allocation_limit", "Layer/scope matches the task"],
-      hint: "The value alone is not enough; layer and section are common validation points."
-    },
-    {
-      id: "restart-tenant",
-      build: "Build 13",
-      title: "Stop and start TRAININGDB",
-      context: "SYSTEMDB or cockpit administration",
-      tool: "SQL Console / Cockpit",
-      prompt: "Stop TRAININGDB, verify it stopped, start it again, and leave it running.",
-      task: "Type the two lifecycle commands in the correct order.",
-      expectedAnswer: `ALTER SYSTEM STOP DATABASE TRAININGDB;
-ALTER SYSTEM START DATABASE TRAININGDB;`,
-      required: ["ALTER SYSTEM STOP DATABASE TRAININGDB", "ALTER SYSTEM START DATABASE TRAININGDB"],
-      validation: ["Tenant is stopped first", "Tenant is started again", "Final status is running"],
-      hint: "The final state matters; do not leave the tenant stopped."
-    },
-    {
-      id: "audit-policy",
-      build: "Build 14",
-      title: "Create audit policy",
-      context: "TRAININGDB with audit privileges",
-      tool: "SQL Console / Cockpit",
-      prompt: "Create AUDIT_APP_USER_LOGIN for successful and unsuccessful APP_USER logins.",
-      task: "Type the CREATE AUDIT POLICY statement.",
-      expectedAnswer: `CREATE AUDIT POLICY AUDIT_APP_USER_LOGIN
-AUDITING SUCCESSFUL CONNECT, UNSUCCESSFUL CONNECT
-USER APP_USER
-LEVEL INFO;`,
-      required: ["CREATE AUDIT POLICY AUDIT_APP_USER_LOGIN", "SUCCESSFUL CONNECT", "UNSUCCESSFUL CONNECT", "USER APP_USER", "LEVEL INFO"],
-      validation: ["Policy name matches", "Both successful and unsuccessful connects are audited", "Target user is APP_USER"],
-      hint: "Auditing only successful logins is incomplete."
-    },
-    {
-      id: "final-validation",
-      build: "Build 15",
-      title: "Validate final configuration",
-      context: "SYSTEMDB and TRAININGDB",
-      tool: "SQL Console / Cockpit",
-      prompt: "Confirm every required object and final operational status before submission.",
-      task: "Type the essential validation checks you would run. Include database, users, table, view, data, privileges, backup, services, and audit policy.",
-      expectedAnswer: `SELECT DATABASE_NAME, ACTIVE_STATUS FROM SYS.M_DATABASES WHERE DATABASE_NAME = 'TRAININGDB';
-SELECT USER_NAME FROM SYS.USERS WHERE USER_NAME IN ('APP_USER', 'REPORT_USER') ORDER BY USER_NAME;
-SELECT SCHEMA_NAME, TABLE_NAME FROM SYS.TABLES WHERE SCHEMA_NAME = 'APP_USER' AND TABLE_NAME = 'CUSTOMER_MASTER';
-SELECT SCHEMA_NAME, VIEW_NAME FROM SYS.VIEWS WHERE SCHEMA_NAME = 'APP_USER' AND VIEW_NAME = 'ACTIVE_CUSTOMERS_V';
-SELECT * FROM APP_USER.CUSTOMER_MASTER ORDER BY CUSTOMER_ID;
-SELECT * FROM APP_USER.ACTIVE_CUSTOMERS_V ORDER BY CUSTOMER_ID;
-SELECT * FROM SYS.GRANTED_PRIVILEGES WHERE GRANTEE IN ('APP_USER', 'REPORT_USER') ORDER BY GRANTEE;
-SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
-      required: ["SYS.M_DATABASES", "TRAININGDB", "SYS.USERS", "APP_USER", "REPORT_USER", "SYS.TABLES", "CUSTOMER_MASTER", "SYS.VIEWS", "ACTIVE_CUSTOMERS_V", "APP_USER.CUSTOMER_MASTER", "APP_USER.ACTIVE_CUSTOMERS_V", "SYS.GRANTED_PRIVILEGES", "SYS.AUDIT_POLICIES", "AUDIT_APP_USER_LOGIN"],
-      validation: ["Every object exists with exact name", "Data rows match", "Privileges are least-privilege", "Backup and service evidence is checked"],
-      hint: "The final check should cover both SQL objects and administrative evidence."
-    }
-  ];
-
-  const hanaQaItems = [
-    {
-      id: "hana-qa-1",
-      question: "Which database context is normally used to create, stop, start, or back up a tenant database?",
-      answer: "SYSTEMDB",
-      required: ["SYSTEMDB"]
-    },
-    {
-      id: "hana-qa-2",
-      question: "What exact tenant database name does this runbook use?",
-      answer: "TRAININGDB",
-      required: ["TRAININGDB"]
-    },
-    {
-      id: "hana-qa-3",
-      question: "Which schema should own CUSTOMER_MASTER when APP_USER creates it?",
-      answer: "APP_USER",
-      required: ["APP_USER"]
-    },
-    {
-      id: "hana-qa-4",
-      question: "What should ACTIVE_CUSTOMERS_V filter on?",
-      answer: "STATUS = 'Active'",
-      required: ["STATUS", "Active"]
-    },
-    {
-      id: "hana-qa-5",
-      question: "Which user should be restricted and read only from the active customers view?",
-      answer: "REPORT_USER",
-      required: ["REPORT_USER"]
-    },
-    {
-      id: "hana-qa-6",
-      question: "What is the required backup prefix?",
-      answer: "TRAININGDB_FULL_BACKUP",
-      required: ["TRAININGDB_FULL_BACKUP"]
-    },
-    {
-      id: "hana-qa-7",
-      question: "What is the exact cockpit resource name?",
-      answer: "HANA_TRAINING_RESOURCE",
-      required: ["HANA_TRAINING_RESOURCE"]
-    },
-    {
-      id: "hana-qa-8",
-      question: "After stop/start tasks, what final tenant status should remain before submission?",
-      answer: "Running or active",
-      required: ["RUNNING|ACTIVE"]
-    }
-  ];
-
-  const qaItems = [
-    ["Cloud Integration", "What is the difference between a message header and an exchange property?", "A header travels with the message and is commonly used by adapters and routing. An exchange property is internal to the exchange and is useful for values that should not be sent to a receiver."],
-    ["Cloud Integration", "When should you use a Content Modifier?", "Use it to create or change the body, headers, and exchange properties without writing custom code."],
-    ["Cloud Integration", "What does a Request Reply step do?", "It performs a synchronous call to a receiver and waits for the response before the integration flow continues."],
-    ["Cloud Integration", "Why externalize parameters?", "Externalization separates environment-specific values from design-time content so the same artifact can be configured across tenants."],
-    ["Cloud Integration", "What is the Message Processing Log used for?", "The MPL records runtime status, processing steps, timestamps, properties, attachments when enabled, and error evidence for a message exchange."],
-    ["Cloud Integration", "What is the practical difference between deploy and save?", "Save persists the design draft. Deploy creates or updates the runtime artifact that can process messages."],
-    ["Cloud Integration", "How do you reference a header in Camel Simple?", "Use ${header.HeaderName}. Exchange properties use ${property.PropertyName}."],
-    ["Cloud Integration", "Why avoid excessive trace logging?", "Trace can expose payload data and consume storage. Enable it temporarily for controlled troubleshooting and disable it afterward."],
-    ["API Management", "What is an API provider?", "It stores backend connectivity details used as the source when creating API proxies."],
-    ["API Management", "What is an API proxy?", "It is the managed facade exposed to consumers, where routing, security, traffic, and transformation policies are applied."],
-    ["API Management", "What does Verify API Key protect?", "It checks that a calling application presents a valid key associated with an approved API product and application."],
-    ["API Management", "What does Spike Arrest do?", "It limits or smooths request rates to protect the target system from sudden bursts."],
-    ["API Management", "Why publish an API product?", "A product packages one or more APIs for discovery, subscription, approval, and consumption through a developer portal or hub."],
-    ["API Management", "Where are policies executed?", "Policies are attached to proxy or target flows such as PreFlow, PostFlow, and conditional flows for requests or responses."],
-    ["Event Mesh", "What is guaranteed messaging?", "The broker persists a message until it can be delivered and acknowledged, subject to queue and redelivery configuration."],
-    ["Event Mesh", "What is the difference between a queue and a topic?", "A topic is a routing address or subscription pattern. A queue stores messages for consumption and can subscribe to one or more topics."],
-    ["Event Mesh", "When is publish/subscribe appropriate?", "Use it when the same event should fan out to multiple independent consumers without coupling the producer to them."],
-    ["Event Mesh", "What does NON_EXCLUSIVE queue access allow?", "It allows multiple consumers to bind to the queue, typically distributing messages among them."],
-    ["Architecture", "What does clean core mean for integration?", "Use released APIs and events, keep custom logic decoupled, govern interfaces, and avoid direct modifications or dependencies on unreleased internals."],
-    ["Architecture", "Why create an integration strategy?", "It aligns business needs, platforms, patterns, governance, ownership, and lifecycle practices across a distributed landscape."],
-    ["Architecture", "What is loose coupling?", "Producers and consumers depend on stable contracts rather than each other's implementation or availability."],
-    ["Operations", "What should you inspect first after an iFlow failure?", "Start with message status and the earliest meaningful warning or error in the MPL, then inspect the failing step and related configuration."],
-    ["Operations", "Why can a receiver return HTTP 401?", "Typical causes include missing or invalid credentials, an incorrect credential alias, token configuration, or insufficient authorization."],
-    ["Operations", "What is a safe retry workflow?", "Correct the root cause, redeploy or update runtime configuration if needed, then retry or resend while checking idempotency and duplicate-processing risk."]
-  ].map((item, index) => ({ id: `qa-${index + 1}`, category: item[0], question: item[1], answer: item[2] }));
-
-  const walkthroughs = [
-    {
-      id: "w-package",
-      title: "Create and deploy an integration package",
-      duration: "15 min",
-      objective: "Create a governed package, add an iFlow artifact, save the draft, and understand when deployment occurs.",
-      steps: [
-        "Open Design → Integrations and choose Create.",
-        "Enter a readable package name, exact technical name, description, and version.",
-        "Open the package and add an Integration Flow artifact.",
-        "Name the iFlow according to the business purpose, not the protocol alone.",
-        "Save the artifact and review the package contents before deployment.",
-        "Deploy only after mandatory configuration and validation are complete."
-      ]
-    },
-    {
-      id: "w-iflow",
-      title: "Build an HTTPS-to-HTTP iFlow",
-      duration: "35 min",
-      objective: "Create a synchronous integration that receives JSON, transforms it, and calls a protected HTTP endpoint.",
-      steps: [
-        "Connect the sender participant to the process with an HTTPS sender adapter.",
-        "Set the HTTPS address and allowed method, then define authentication as required.",
-        "Add a Content Modifier for correlation and business headers.",
-        "Convert JSON to XML before XML-based message mapping.",
-        "Create and test the message mapping with representative input.",
-        "Add Request Reply and connect the receiver with an HTTP adapter.",
-        "Externalize the host, configure authentication, save, deploy, and send a test request.",
-        "Open Message Monitoring and confirm the exchange completed."
-      ]
-    },
-    {
-      id: "w-monitor",
-      title: "Troubleshoot a failed exchange",
-      duration: "20 min",
-      objective: "Use runtime evidence to isolate the first failing component and verify the correction.",
-      steps: [
-        "Open Monitor → Integrations → Message Processing.",
-        "Filter by artifact, time window, status, or correlation identifier.",
-        "Open the failed message and read the earliest warning and root exception.",
-        "Identify whether the cause is payload, mapping, connectivity, authentication, or receiver behavior.",
-        "Correct the smallest relevant configuration or design issue.",
-        "Redeploy only if the artifact changed; runtime material changes may not require it.",
-        "Retry or resend with duplicate-processing risk in mind.",
-        "Confirm the new MPL is completed and record the root cause."
-      ]
-    },
-    {
-      id: "w-api",
-      title: "Create and protect an API proxy",
-      duration: "30 min",
-      objective: "Expose a backend API through a versioned proxy with consumer and traffic controls.",
-      steps: [
-        "Create an API provider and verify backend connectivity.",
-        "Create an API proxy from the provider and select the required resources.",
-        "Set a stable versioned base path such as /v1/orders.",
-        "Add Verify API Key to the request PreFlow.",
-        "Add Spike Arrest and configure the required request rate.",
-        "Use the trace or test console to validate policy execution.",
-        "Deploy the proxy and create an API product.",
-        "Publish the product and test with an approved application key."
-      ]
-    },
-    {
-      id: "w-security",
-      title: "Configure receiver authentication",
-      duration: "20 min",
-      objective: "Create security material and bind its alias to an adapter without exposing the secret in design content.",
-      steps: [
-        "Determine the required authentication type from the receiver contract.",
-        "Open Monitor → Security Material.",
-        "Create the correct material type and give it a deliberate alias.",
-        "Enter the credential or token-endpoint details and deploy the material.",
-        "Open the receiver adapter and select or enter the exact credential alias.",
-        "Save and deploy the iFlow if its adapter configuration changed.",
-        "Run a controlled test and verify authentication in the MPL.",
-        "Rotate or delete practice secrets when they are no longer required."
-      ]
-    },
-    {
-      id: "w-event",
-      title: "Create an Event Mesh queue and subscription",
-      duration: "25 min",
-      objective: "Route a business event into a durable queue with controlled redelivery.",
-      steps: [
-        "Identify the exact event topic and contract from the producer.",
-        "Create a queue with a meaningful lower-case name.",
-        "Choose exclusive or non-exclusive access based on the consumer model.",
-        "Set message size, retention, and redelivery limits if available.",
-        "Add the topic subscription using the exact hierarchy and case.",
-        "Publish a representative event and verify it arrives in the queue.",
-        "Bind a consumer and acknowledge the message.",
-        "Test an error path and confirm redelivery behavior."
-      ]
-    },
-    {
-      id: "w-mapping",
-      title: "Create and test message mapping",
-      duration: "25 min",
-      objective: "Transform a source order structure into the target contract and test representative edge cases.",
-      steps: [
-        "Import or create the source and target message types.",
-        "Map identifiers and business fields by meaning.",
-        "Add constants, default values, or context handling where required.",
-        "Use mapping functions only when the business rule requires them.",
-        "Test a normal payload and verify every mandatory target element.",
-        "Test missing optional fields and repeated source nodes.",
-        "Save the mapping and bind it in the correct iFlow position.",
-        "Run an end-to-end message and compare the receiver payload."
-      ]
-    },
-    {
-      id: "w-mock",
-      title: "Run a disciplined three-hour attempt",
-      duration: "180 min",
-      objective: "Use a repeatable assessment strategy that preserves review time and reduces avoidable configuration errors.",
-      steps: [
-        "Read all tasks first and mark exact names, paths, aliases, rates, and topics.",
-        "Complete short foundation tasks before long build tasks.",
-        "Save after every meaningful configuration block.",
-        "Validate each artifact as soon as a usable path exists.",
-        "Use monitoring evidence instead of changing several settings at once.",
-        "Keep a scratch list of incomplete details and return to them.",
-        "Stop new work with thirty minutes remaining and review exact values.",
-        "Submit only after checking every activity status and required deployment."
+      checklist: [
+        ["Readiness", "I can complete the task without looking."],
+        ["Readiness", "I can explain every code block line by line."],
+        ["Readiness", "I can fill in the answer skeleton."],
+        ["Readiness", "I know the expected answer."],
+        ["Verification", "I can verify the result in the correct SAP tool."],
+        ["Verification", "I know the common mistakes."],
+        ["Verification", "I can fix the error using a Debugging Charm."],
+        ["Sources", "I can trace the task back to a source reference."],
+        ["HANA Cloud", "I can explain BTP accounts, entitlements, Cloud Central, cockpit, and Database Explorer."],
+        ["Migration", "I can prepare source, target, migration user, Cloud Connector, compatibility check, and validation plan."],
+        ["Administration", "I can explain sizing, hdblcm, tenant lifecycle, backup, recovery, monitoring, security, and roles."],
+        ["Final Boss", "I have run a timed attempt across Cloud, migration, install, SQL, and security tasks."]
       ]
     }
-  ];
+  };
 
-  const landmarks = [
-    {
-      id: "l-strategy",
-      unit: "01",
-      title: "Integration strategy and clean core",
-      duration: "32 min",
-      description: "Understand SAP's integration strategy and why clean-core decisions matter.",
-      lessons: ["Presenting the SAP Integration Strategy", "Introducing the Clean Core Approach"]
-    },
-    {
-      id: "l-suite",
-      unit: "02",
-      title: "SAP Integration Suite",
-      duration: "44 min",
-      description: "Recognize distributed architecture challenges, capabilities, constraints, and suite components.",
-      lessons: ["Distributed Architectures", "Understanding Integration Suite", "Capabilities and Considerations", "Exploring Suite Capabilities"]
-    },
-    {
-      id: "l-api",
-      unit: "03",
-      title: "API Management",
-      duration: "2 hr 22 min",
-      description: "Manage the API lifecycle from providers and proxies to policies, products, and consumer discovery.",
-      lessons: ["API Management Components", "API Lifecycle", "API Providers and Proxies", "Policies", "Developer Hub and Products", "Graph"]
-    },
-    {
-      id: "l-cloud",
-      unit: "04",
-      title: "Cloud Integration",
-      duration: "3 hr 24 min",
-      description: "Build, configure, deploy, monitor, and troubleshoot integration flows.",
-      lessons: ["Basic Concepts", "Connectivity", "Operating Model", "System Scope", "Design Guidelines", "Development Cycle", "Monitoring", "Camel Data", "Integration Flow"]
-    },
-    {
-      id: "l-event",
-      unit: "05",
-      title: "Event Mesh",
-      duration: "3 hr 40 min",
-      description: "Use event-driven architecture, messaging patterns, Event Mesh, and Advanced Event Mesh.",
-      lessons: ["Event-Driven Architecture", "Direct and Guaranteed Messaging", "SAP Event Mesh", "Event Mesh Capability", "Advanced Event Mesh"]
+  const statusLabels = ["Locked", "Unlocked", "In Progress", "Mastered", "Boss Ready"];
+  const state = loadState();
+  const requestedStream = new URLSearchParams(location.search).get("stream");
+  let activeStreamId = streams[requestedStream] ? requestedStream : (streams[localStorage.getItem(STREAM_KEY)] ? localStorage.getItem(STREAM_KEY) : "stream1");
+  let activeSection = "dashboard";
+  let simulatorIndex = 0;
+  let bossTicker = null;
+
+  const page = document.getElementById("page");
+  const primaryNav = document.getElementById("primaryNav");
+  const pageTitle = document.getElementById("pageTitle");
+  const breadcrumb = document.getElementById("breadcrumb");
+  const timerPill = document.getElementById("timerPill");
+  const globalTimer = document.getElementById("globalTimer");
+
+  function loadState() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
     }
-  ];
+  }
 
-  const baseChecklist = [
-    ["Preparation", "Verify the current C_CPI_2601 certification page and assessment format."],
-    ["Preparation", "Complete all five CLD900 units and their knowledge checks."],
-    ["Preparation", "Create a one-page reference for exact syntax, aliases, paths, and policy names."],
-    ["Preparation", "Complete at least two uninterrupted three-hour practice attempts."],
-    ["Cloud Integration", "Create a package and iFlow from memory."],
-    ["Cloud Integration", "Configure HTTPS, HTTP, and at least one asynchronous adapter."],
-    ["Cloud Integration", "Use Content Modifier, converter, mapping, Request Reply, and routing."],
-    ["Cloud Integration", "Use Camel Simple for headers and exchange properties."],
-    ["Cloud Integration", "Externalize environment-specific configuration."],
-    ["Cloud Integration", "Diagnose a failed message from MPL evidence."],
-    ["API Management", "Create an API provider and versioned API proxy."],
-    ["API Management", "Configure Verify API Key and Spike Arrest."],
-    ["API Management", "Deploy a proxy and publish an API product."],
-    ["Event Mesh", "Explain queue, topic, subscription, and guaranteed messaging."],
-    ["Event Mesh", "Create a queue and exact topic subscription."],
-    ["Security", "Create and deploy User Credentials and OAuth2 material."],
-    ["Security", "Reference a security material alias from an adapter."],
-    ["Exam day", "Check system requirements, identity documents, and appointment time."],
-    ["Exam day", "Read all activities before changing the tenant."],
-    ["Exam day", "Reserve the final thirty minutes for exact-value and deployment checks."]
-  ].map((item, index) => ({ id: `base-${index + 1}`, group: item[0], text: item[1], custom: false }));
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
 
-  let db;
-  let activeProfile;
-  let userState;
-  let notes = [];
-  let currentRoute = "dashboard";
-  let currentChallenge = 0;
-  let currentHanaTask = 0;
-  let qaFilter = "All";
-  let qaSearch = "";
-  let noteSearch = "";
-  let selectedNoteId = null;
-  let confirmAction = null;
-  let timerInterval = null;
+  function stream() {
+    return streams[activeStreamId] || streams.stream1;
+  }
 
-  function defaultUserState(userId) {
-    return {
-      userId,
-      roadmap: {},
-      simAnswers: {},
-      simPassed: {},
-      simFeedback: {},
-      hanaAnswers: {},
-      hanaPassed: {},
-      hanaFeedback: {},
-      hanaQaAnswers: {},
-      hanaQaFeedback: {},
-      qaReviewed: {},
-      walkSteps: {},
-      landmarks: {},
+  function progress(streamId = activeStreamId) {
+    state[streamId] ||= {
+      quests: {},
+      labs: {},
       checklist: {},
-      customChecklist: [],
-      activityLog: [],
-      mock: {
-        active: false,
-        submitted: false,
-        startedAt: null,
-        endAt: null,
-        answers: {},
-        passed: {},
-        current: 0,
-        history: []
-      },
-      updatedAt: Date.now()
+      simulator: {},
+      boss: { active: false, endAt: 0, completed: {}, history: [] },
+      lastRune: ""
     };
-  }
-
-  function openDatabase() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-      request.onupgradeneeded = () => {
-        const database = request.result;
-        if (!database.objectStoreNames.contains("profiles")) {
-          database.createObjectStore("profiles", { keyPath: "id" });
-        }
-        if (!database.objectStoreNames.contains("userStates")) {
-          database.createObjectStore("userStates", { keyPath: "userId" });
-        }
-        if (!database.objectStoreNames.contains("notes")) {
-          const store = database.createObjectStore("notes", { keyPath: "id" });
-          store.createIndex("userId", "userId", { unique: false });
-        }
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  function dbGet(storeName, key) {
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readonly");
-      const request = transaction.objectStore(storeName).get(key);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  function dbGetAll(storeName) {
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readonly");
-      const request = transaction.objectStore(storeName).getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  function dbPut(storeName, value) {
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readwrite");
-      transaction.objectStore(storeName).put(value);
-      transaction.oncomplete = () => resolve(value);
-      transaction.onerror = () => reject(transaction.error);
-    });
-  }
-
-  function dbDelete(storeName, key) {
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(storeName, "readwrite");
-      transaction.objectStore(storeName).delete(key);
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error);
-    });
-  }
-
-  async function hashPin(pin) {
-    if (!pin) return "";
-    const data = new TextEncoder().encode(pin);
-    const hash = await crypto.subtle.digest("SHA-256", data);
-    return Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
-  }
-
-  async function ensureGuestProfile() {
-    let guest = await dbGet("profiles", "guest");
-    if (!guest) {
-      guest = {
-        id: "guest",
-        name: "Guest learner",
-        initials: "G",
-        pinHash: "",
-        createdAt: Date.now(),
-        lastLogin: Date.now()
-      };
-      await dbPut("profiles", guest);
-    }
-    return guest;
-  }
-
-  async function loadProfile(profile) {
-    activeProfile = profile;
-    activeProfile.lastLogin = Date.now();
-    await dbPut("profiles", activeProfile);
-    localStorage.setItem(ACTIVE_PROFILE_KEY, profile.id);
-    const savedState = await dbGet("userStates", profile.id);
-    userState = savedState ? mergeStateDefaults(defaultUserState(profile.id), savedState) : defaultUserState(profile.id);
-    notes = (await dbGetAll("notes"))
-      .filter((note) => note.userId === profile.id)
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-    selectedNoteId = notes[0]?.id || null;
-    updateProfileUI();
-    renderRoute();
-  }
-
-  async function saveUserState() {
-    userState.updatedAt = Date.now();
-    await dbPut("userStates", userState);
+    state[streamId].boss ||= { active: false, endAt: 0, completed: {}, history: [] };
+    state[streamId].quests ||= {};
+    state[streamId].labs ||= {};
+    state[streamId].checklist ||= {};
+    state[streamId].simulator ||= {};
+    return state[streamId];
   }
 
   function esc(value) {
@@ -959,1048 +434,645 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     return icons[name] || "";
   }
 
-  function initials(name) {
-    return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() || "").join("") || "U";
+  function pct(done, total) {
+    return total ? Math.round((done / total) * 100) : 0;
   }
 
-  function showToast(message, type = "") {
-    const stack = document.getElementById("toastStack");
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`.trim();
-    toast.textContent = message;
-    stack.appendChild(toast);
-    setTimeout(() => toast.remove(), 3400);
-  }
-
-  function logActivity(text) {
-    userState.activityLog.unshift({ text, time: Date.now() });
-    userState.activityLog = userState.activityLog.slice(0, 10);
-  }
-
-  function percent(count, total) {
-    return total ? Math.round((count / total) * 100) : 0;
+  function formatSeconds(total) {
+    const safe = Math.max(0, Math.floor(total));
+    const hours = String(Math.floor(safe / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((safe % 3600) / 60)).padStart(2, "0");
+    const seconds = String(safe % 60).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
   }
 
   function progressStats() {
-    const roadmap = percent(Object.values(userState.roadmap).filter(Boolean).length, roadmapDays.length);
-    const simulator = percent(Object.values(userState.simPassed).filter(Boolean).length, systemChallenges.length);
-    const hana = percent(Object.values(userState.hanaPassed || {}).filter(Boolean).length, hanaBuildTasks.length);
-    const qa = percent(Object.keys(userState.qaReviewed).length, qaItems.length);
-    const totalSteps = walkthroughs.reduce((sum, item) => sum + item.steps.length, 0);
-    const walkthrough = percent(Object.values(userState.walkSteps).filter(Boolean).length, totalSteps);
-    const landmark = percent(Object.values(userState.landmarks).filter(Boolean).length, landmarks.length);
-    const allChecks = [...baseChecklist, ...userState.customChecklist];
-    const checklist = percent(allChecks.filter((item) => userState.checklist[item.id]).length, allChecks.length);
-    const readiness = Math.round(
-      roadmap * 0.15 +
-      simulator * 0.30 +
-      hana * 0.10 +
-      qa * 0.10 +
-      walkthrough * 0.10 +
-      landmark * 0.15 +
-      checklist * 0.10
-    );
-    return { roadmap, simulator, hana, qa, walkthrough, landmark, checklist, readiness };
+    const s = stream();
+    const p = progress();
+    const questReady = Object.values(p.quests).filter((value) => Number(value) >= 3).length;
+    const labsDone = Object.values(p.labs).filter(Boolean).length;
+    const checklistDone = Object.values(p.checklist).filter(Boolean).length;
+    const simDone = Object.values(p.simulator).filter((item) => item?.correct).length;
+    const quest = pct(questReady, s.questMap.length);
+    const labs = pct(labsDone, s.tasks.length);
+    const checklist = pct(checklistDone, s.checklist.length);
+    const sim = pct(simDone, s.simulator.length);
+    const readiness = Math.round(quest * 0.28 + labs * 0.30 + sim * 0.24 + checklist * 0.18);
+    return { quest, labs, checklist, sim, readiness, questReady, labsDone, checklistDone, simDone };
   }
 
-  function nextChallengeIndex() {
-    const index = systemChallenges.findIndex((challenge) => !userState.simPassed[challenge.id]);
-    return index === -1 ? 0 : index;
+  function renderNav() {
+    primaryNav.innerHTML = `
+      <p class="nav-label">Academy sections</p>
+      ${sections.map(([id, label, iconName]) => `
+        <button class="nav-item ${id === activeSection ? "active" : ""}" data-route="${id}" type="button">
+          <span class="nav-icon">${icon(iconName)}</span>
+          <span>${esc(label)}</span>
+        </button>
+      `).join("")}
+    `;
   }
 
-  function mergeStateDefaults(target, source) {
-    Object.keys(source || {}).forEach((key) => {
-      if (
-        source[key] &&
-        typeof source[key] === "object" &&
-        !Array.isArray(source[key]) &&
-        target[key] &&
-        typeof target[key] === "object" &&
-        !Array.isArray(target[key])
-      ) {
-        mergeStateDefaults(target[key], source[key]);
-      } else {
-        target[key] = source[key];
-      }
-    });
-    return target;
+  function renderStreamMini() {
+    const s = stream();
+    document.getElementById("streamMini").innerHTML = `
+      <span class="mini-label">Current stream</span>
+      <strong>${esc(s.shortLabel)}</strong>
+      <small>${esc(s.certification)}</small>
+      <button class="text-link" data-route="dashboard" type="button">Change stream</button>
+    `;
   }
 
-  function updateProfileUI() {
-    document.getElementById("profileName").textContent = activeProfile.name;
-    document.getElementById("profileAvatar").textContent = activeProfile.initials;
-  }
-
-  function applyTheme(theme) {
-    const actual = theme === "dark" ? "dark" : "light";
-    document.documentElement.dataset.theme = actual;
-    localStorage.setItem(THEME_KEY, actual);
-    document.querySelector("#themeButton span").innerHTML = icon(actual === "dark" ? "sun" : "moon");
-    document.getElementById("themeButton").setAttribute("aria-label", actual === "dark" ? "Switch to light mode" : "Switch to dark mode");
-  }
-
-  function setRoute(route) {
-    const target = pageMeta[route] ? route : "dashboard";
-    if (location.hash !== `#${target}`) {
-      location.hash = target;
-      return;
+  function goTo(section) {
+    const exists = sections.some(([id]) => id === section);
+    activeSection = exists ? section : "dashboard";
+    if (location.hash.replace("#", "") !== activeSection) {
+      location.hash = activeSection;
     }
-    currentRoute = target;
     renderRoute();
   }
 
   function renderRoute() {
-    const route = location.hash.replace("#", "") || "dashboard";
-    currentRoute = pageMeta[route] ? route : "dashboard";
-    const [title, breadcrumb] = pageMeta[currentRoute];
-    document.getElementById("pageTitle").textContent = title;
-    document.getElementById("breadcrumb").textContent = breadcrumb;
-    document.querySelectorAll("[data-nav]").forEach((button) => {
-      button.classList.toggle("active", button.dataset.nav === currentRoute);
-    });
-    const page = document.getElementById("page");
+    const hash = location.hash.replace("#", "");
+    if (sections.some(([id]) => id === hash)) activeSection = hash;
+    const label = sections.find(([id]) => id === activeSection)?.[1] || "Spell Desk";
+    pageTitle.textContent = label;
+    breadcrumb.textContent = `${stream().shortLabel} / ${label}`;
+    renderNav();
+    renderStreamMini();
+
     const renderers = {
       dashboard: renderDashboard,
+      grimoire: renderGrimoire,
       roadmap: renderRoadmap,
+      library: renderLibrary,
+      labs: renderLabs,
+      charms: renderCharms,
       simulator: renderSimulator,
-      hana: renderHanaLab,
-      questions: renderQuestions,
-      walkthroughs: renderWalkthroughs,
-      landmarks: renderLandmarks,
-      checklist: renderChecklist,
-      notes: renderNotes,
-      mock: renderMock
+      boss: renderBoss,
+      checklist: renderChecklist
     };
-    page.innerHTML = renderers[currentRoute]();
+    page.innerHTML = (renderers[activeSection] || renderDashboard)();
     page.focus({ preventScroll: true });
-    window.scrollTo({ top: 0, behavior: "instant" });
-    document.getElementById("sidebar").classList.remove("open");
-    document.getElementById("sidebarScrim").hidden = true;
     updateTimer();
+  }
+
+  function renderDashboard() {
+    const s = stream();
+    const p = progress();
+    const stats = progressStats();
+    const nextQuest = s.questMap.findIndex((_, index) => Number(p.quests[index] || 0) < 3);
+    const questIndex = nextQuest === -1 ? 0 : nextQuest;
+    return `
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Welcome to the SAP Spellbook Academy</p>
+          <h2>Choose your certification stream and open the grimoire.</h2>
+          <p>Each stream contains a practice grimoire, guided quests, hands-on potion labs, debugging charms, timed simulations, final boss trials, and a moonstone readiness checklist.</p>
+          <div class="hero-line">Study the scrolls. Practise the spells. Defeat the exam beast.</div>
+        </div>
+        <div class="boss-orb ${stats.readiness >= 80 ? "glowing" : ""}">
+          <strong>${stats.readiness}%</strong>
+          <span>Moonstone charge</span>
+        </div>
+      </section>
+
+      <section class="stream-choice-grid" aria-label="Choose your stream">
+        ${Object.entries(streams).map(([id, item]) => `
+          <article class="stream-card ${id === activeStreamId ? "active" : ""}">
+            <div class="card-kicker"><span>${esc(item.label)}</span><span>${esc(item.cardTitle)}</span></div>
+            <h3>${esc(item.certification)}</h3>
+            <p>${esc(item.summary)}</p>
+            <button class="button ${id === activeStreamId ? "button-primary" : "button-secondary"}" data-stream="${id}" type="button">${esc(item.button)}</button>
+          </article>
+        `).join("")}
+      </section>
+
+      <section class="desk-grid">
+        ${deskWidget("Today's Spell", s.desk.today, "wand")}
+        ${deskWidget("Current Quest", s.questMap[questIndex][0], "map")}
+        ${deskWidget("Exam Hourglass", s.desk.hourglass, "timer")}
+        ${deskWidget("Last Completed Rune", p.lastRune || "No rune completed yet", "spark")}
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">${esc(s.label)}</p>
+              <h2>${esc(s.grimoire)}</h2>
+              <p>${esc(s.desk.reminder)}</p>
+            </div>
+          </div>
+          <div class="progress-stack">
+            ${progressLine("Quest Map", stats.quest)}
+            ${progressLine("Potion Labs", stats.labs)}
+            ${progressLine("Spell Simulator", stats.sim)}
+            ${progressLine("Moonstone Checklist", stats.checklist)}
+          </div>
+          <div class="action-row">
+            <button class="button button-primary" data-route="grimoire" type="button">Open Practice Grimoire ${icon("arrow")}</button>
+            <button class="button button-secondary" data-route="boss" type="button">Enter Final Boss Trial</button>
+          </div>
+        </article>
+
+        <article class="panel academy-map">
+          <p class="eyebrow">Academy structure</p>
+          <h3>Every stream has its own grimoire.</h3>
+          <p>Inside each grimoire, every task becomes a spell: objective, ingredients, portal route, casting steps, code runes, translations, finished spell, blank scroll, debugging curses, and proof checks.</p>
+          <div class="mini-map">
+            ${sections.slice(1).map(([, label]) => `<span>${esc(label)}</span>`).join("")}
+          </div>
+        </article>
+      </section>
+      ${sourceStrip()}
+    `;
+  }
+
+  function deskWidget(title, body, iconName) {
+    return `
+      <article class="desk-widget">
+        <span class="metric-icon">${icon(iconName)}</span>
+        <strong>${esc(title)}</strong>
+        <p>${esc(body)}</p>
+      </article>
+    `;
+  }
+
+  function progressLine(label, value) {
+    return `
+      <div class="progress-line">
+        <div><strong>${esc(label)}</strong><span>${value >= 100 ? "Mastered" : "In progress"}</span></div>
+        <div class="progress-track"><span style="width:${value}%"></span></div>
+        <b>${value}%</b>
+      </div>
+    `;
+  }
+
+  function renderGrimoire() {
+    const s = stream();
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">${esc(s.label)} Practice Grimoire</p>
+          <h2>${esc(s.grimoire)}</h2>
+          <p>A spell-by-spell workbook with guided tasks, code runes, answer skeletons, expected results, cheat sheets, glossary terms, debugging charms, and source scroll references.</p>
+        </div>
+      </div>
+      <section class="task-scroll-list">
+        ${s.tasks.map((task, index) => taskScroll(task, index, true)).join("")}
+      </section>
+    `;
+  }
+
+  function taskScroll(task, index, openFirst = false) {
+    return `
+      <details class="task-scroll" ${openFirst && index === 0 ? "open" : ""}>
+        <summary>
+          <span class="scroll-number">${String(index + 1).padStart(2, "0")}</span>
+          <div>
+            <h3>${esc(task.name)}</h3>
+            <p>${esc(task.difficulty)} - ${esc(task.time)} - ${esc(task.source)}</p>
+          </div>
+        </summary>
+        <div class="scroll-body">
+          ${scrollBlock("The Prophecy", task.prophecy)}
+          ${listBlock("Spell Ingredients", task.ingredients)}
+          ${scrollBlock("Portal Route", task.route)}
+          ${listBlock("Casting Steps", task.steps, true)}
+          ${codeBlock("Code Runes", task.code)}
+          ${listBlock("Rune Translation", task.translation)}
+          ${scrollBlock("The Finished Spell", task.finished)}
+          ${codeBlock("Blank Spell Scroll", task.blank)}
+          ${scrollBlock("Proof of Magic", task.proof)}
+          ${listBlock("Curses and Traps", task.traps)}
+          ${scrollBlock("Counter-Spell", task.counter)}
+          ${scrollBlock("Source Scroll", task.source)}
+        </div>
+      </details>
+    `;
+  }
+
+  function scrollBlock(title, body) {
+    return `<div class="scroll-block"><strong>${esc(title)}</strong><p>${esc(body)}</p></div>`;
+  }
+
+  function listBlock(title, items, ordered = false) {
+    const tag = ordered ? "ol" : "ul";
+    return `<div class="scroll-block"><strong>${esc(title)}</strong><${tag}>${items.map((item) => `<li>${esc(item)}</li>`).join("")}</${tag}></div>`;
+  }
+
+  function codeBlock(title, code) {
+    return `<div class="scroll-block"><strong>${esc(title)}</strong><pre>${esc(code)}</pre></div>`;
+  }
+
+  function renderRoadmap() {
+    const s = stream();
+    const p = progress();
+    const mastered = Object.values(p.quests).filter((value) => Number(value) >= 3).length;
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">The full certification journey</p>
+          <h2>Quest Map</h2>
+          <p>Turn the exam into chapters, chapters into quests, and quests into practical tasks. Click a quest to advance its status.</p>
+        </div>
+        <span class="tag">${mastered}/${s.questMap.length} mastered</span>
+      </div>
+      <section class="quest-grid">
+        ${s.questMap.map((quest, index) => {
+          const level = Number(p.quests[index] || 0);
+          return `
+            <article class="quest-card status-${level}">
+              <div class="card-kicker"><span>Quest ${index + 1}</span><span>${esc(quest[2])}</span></div>
+              <h3>${esc(quest[0])}</h3>
+              <p>${esc(quest[1])}</p>
+              <button class="status-button" data-quest="${index}" type="button">${esc(statusLabels[level])}</button>
+            </article>
+          `;
+        }).join("")}
+      </section>
+    `;
+  }
+
+  function renderLibrary() {
+    const s = stream();
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">The resource vault</p>
+          <h2>Arcane Library</h2>
+          <p>All source scrolls live here: PDFs, DOCX notes, official SAP pages, cheat sheets, glossary anchors, and downloadable handbooks.</p>
+        </div>
+      </div>
+      <section class="library-grid">
+        ${s.library.map(([title, type, body, href]) => `
+          <article class="library-card">
+            <span class="tag">${esc(type)}</span>
+            <h3>${esc(title)}</h3>
+            <p>${esc(body)}</p>
+            <a class="button button-secondary" href="${esc(href)}" target="_blank" rel="noreferrer">Open scroll</a>
+          </article>
+        `).join("")}
+      </section>
+      ${sourceStrip()}
+    `;
+  }
+
+  function renderLabs() {
+    const s = stream();
+    const p = progress();
+    const done = Object.values(p.labs).filter(Boolean).length;
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Hands-on practice</p>
+          <h2>Potion Labs</h2>
+          <p>Theory becomes muscle memory here. Each lab has ingredients, route, steps, code, explanation, expected answer, and verification checks.</p>
+        </div>
+        <span class="tag green">${done}/${s.tasks.length} mastered</span>
+      </div>
+      <section class="lab-grid">
+        ${s.tasks.map((task, index) => {
+          const mastered = Boolean(p.labs[index]);
+          return `
+            <article class="lab-card ${mastered ? "mastered" : ""}">
+              <div class="card-kicker"><span>Lab ${index + 1}</span><span>${mastered ? "Mastered" : task.difficulty}</span></div>
+              <h3>${esc(task.name)}</h3>
+              <p>${esc(task.prophecy)}</p>
+              <div class="lab-actions">
+                <details><summary>Show Ingredients</summary>${listBlock("", task.ingredients)}</details>
+                <details><summary>Reveal Code Runes</summary>${codeBlock("", task.code)}</details>
+                <details><summary>Explain Rune by Rune</summary>${listBlock("", task.translation)}</details>
+                <details><summary>Check My Spell</summary>${scrollBlock("Expected", task.finished)}${scrollBlock("Proof", task.proof)}</details>
+              </div>
+              <button class="button ${mastered ? "button-success" : "button-primary"}" data-lab="${index}" type="button">${mastered ? "Mastered" : "Mark as Mastered"}</button>
+            </article>
+          `;
+        }).join("")}
+      </section>
+    `;
+  }
+
+  function renderCharms() {
+    const s = stream();
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Error fixes</p>
+          <h2>Debugging Charms</h2>
+          <p>Every exam has curses. This section teaches you how to break them.</p>
+        </div>
+      </div>
+      <section class="charm-list">
+        ${s.charms.map(([curse, cause, counter, proof, task]) => `
+          <article class="charm-card">
+            <div class="curse-ribbon">Curse</div>
+            <h3>${esc(curse)}</h3>
+            <dl>
+              <dt>Cause</dt><dd>${esc(cause)}</dd>
+              <dt>Counter-Spell</dt><dd>${esc(counter)}</dd>
+              <dt>Proof</dt><dd>${esc(proof)}</dd>
+              <dt>Related Task</dt><dd>${esc(task)}</dd>
+            </dl>
+          </article>
+        `).join("")}
+      </section>
+    `;
+  }
+
+  function renderSimulator() {
+    const s = stream();
+    const p = progress();
+    const scenario = s.simulator[simulatorIndex % s.simulator.length];
+    const saved = p.simulator[scenario[0]];
+    const answered = saved && typeof saved.choice === "number";
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Random practice mode</p>
+          <h2>Spell Simulator</h2>
+          <p>Answer using the grimoire structure: tool, route, steps, code, explanation, expected result, and verification.</p>
+        </div>
+        <div class="heading-actions">
+          <button class="button button-secondary" data-sim-random type="button">Random Spell</button>
+          <button class="button button-primary" data-sim-next type="button">Next Spell</button>
+        </div>
+      </div>
+      <section class="simulator-card">
+        <div class="mode-row">
+          <span>Apprentice Mode: hints on</span>
+          <span>Mage Mode: limited hints</span>
+          <span>Final Boss Mode: no hints</span>
+          <span>Rune Mode: explain the answer</span>
+        </div>
+        <p class="eyebrow">Scenario ${simulatorIndex + 1} of ${s.simulator.length}</p>
+        <h3>${esc(scenario[0])}</h3>
+        <div class="choice-grid">
+          ${scenario[1].map((choice, index) => `
+            <button class="choice-button ${answered && saved.choice === index ? (saved.correct ? "correct" : "wrong") : ""}" data-sim-choice="${index}" type="button">
+              <span>${String.fromCharCode(65 + index)}</span>${esc(choice)}
+            </button>
+          `).join("")}
+        </div>
+        ${answered ? `
+          <div class="feedback ${saved.correct ? "success" : "error"}">
+            <strong>${saved.correct ? "Finished spell" : "Needs a counter-spell"}</strong>
+            <p>${esc(scenario[3])}</p>
+          </div>
+        ` : '<div class="hint-box">Choose an answer, then translate the reasoning in your own words before moving on.</div>'}
+      </section>
+    `;
+  }
+
+  function renderBoss() {
+    const s = stream();
+    const p = progress();
+    const boss = p.boss;
+    const remaining = boss.active ? Math.max(0, Math.ceil((boss.endAt - Date.now()) / 1000)) : BOSS_SECONDS;
+    const completed = Object.values(boss.completed || {}).filter(Boolean).length;
+    if (!boss.active) {
+      return `
+        <section class="boss-welcome">
+          <div>
+            <p class="eyebrow">You have entered the exam arena.</p>
+            <h2>Complete each task. Verify every result. Do not submit until the Moonstone glows.</h2>
+            <p>The Final Boss Trial is the pressure test for ${esc(s.certification)}. Timer on. Hints off. Grimoire closed.</p>
+            <ul class="boss-rules">
+              <li>Read every task before changing anything.</li>
+              <li>Track exact names, paths, aliases, values, and tools.</li>
+              <li>Reserve the final thirty minutes for verification.</li>
+              <li>Use the checklist after the trial to repair weak areas.</li>
+            </ul>
+            <button class="button button-warning" data-boss-start type="button">Start Final Boss Trial</button>
+          </div>
+          <div class="boss-clock"><strong>03:00:00</strong><span>Trial time</span></div>
+        </section>
+      `;
+    }
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Countdown active</p>
+          <h2>Final Boss Trial</h2>
+          <p>Complete the stream tasks before the exam beast wakes.</p>
+        </div>
+        <div class="heading-actions">
+          <span class="tag">${formatSeconds(remaining)}</span>
+          <button class="button button-warning" data-boss-submit type="button">Submit Trial</button>
+        </div>
+      </div>
+      <section class="boss-panel">
+        <div class="boss-progress">
+          <div class="boss-orb ${completed === s.tasks.length ? "glowing" : ""}">
+            <strong>${completed}/${s.tasks.length}</strong>
+            <span>Tasks complete</span>
+          </div>
+          <p>When every task is checked and the Moonstone glows, submit your trial and review the repair list.</p>
+        </div>
+        <div class="boss-task-list">
+          ${s.tasks.map((task, index) => {
+            const checked = Boolean(boss.completed?.[index]);
+            return `
+              <label class="check-row ${checked ? "checked" : ""}">
+                <input type="checkbox" data-boss-task="${index}" ${checked ? "checked" : ""}>
+                <span>${esc(task.name)}</span>
+              </label>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderChecklist() {
+    const s = stream();
+    const p = progress();
+    const groups = [...new Set(s.checklist.map(([group]) => group))];
+    const done = Object.values(p.checklist).filter(Boolean).length;
+    const charge = pct(done, s.checklist.length);
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Readiness tracker</p>
+          <h2>Moonstone Checklist</h2>
+          <p>The Moonstone only glows when you are truly ready.</p>
+        </div>
+        <div class="boss-orb small ${charge === 100 ? "glowing" : ""}">
+          <strong>${charge}%</strong>
+          <span>Charged</span>
+        </div>
+      </div>
+      <section class="checklist-layout">
+        ${groups.map((group) => `
+          <article class="panel">
+            <h3>${esc(group)}</h3>
+            ${s.checklist.map((item, index) => ({ item, index })).filter(({ item }) => item[0] === group).map(({ item, index }) => {
+              const checked = Boolean(p.checklist[index]);
+              return `
+                <label class="check-row ${checked ? "checked" : ""}">
+                  <input type="checkbox" data-check="${index}" ${checked ? "checked" : ""}>
+                  <span>${esc(item[1])}</span>
+                </label>
+              `;
+            }).join("")}
+          </article>
+        `).join("")}
+      </section>
+    `;
   }
 
   function sourceStrip() {
     return `
       <section class="source-strip">
         <div>
-          <h3>Use the official SAP material as your source of truth</h3>
-          <p>This spellbook is unofficial and learner-made. Scope and product behavior can change, so verify important details with SAP Learning.</p>
+          <h3>Use SAP as the source of truth</h3>
+          <p>This academy is learner-made. Product behavior and certification scope can change, so confirm important details against SAP Learning and SAP Help.</p>
         </div>
         <div class="source-row">
-          <a href="https://learning.sap.com/certifications/sap-certified-associate-integration-developer" target="_blank" rel="noreferrer">Certification</a>
-          <a href="https://learning.sap.com/learning-journeys/developing-with-sap-integration-suite" target="_blank" rel="noreferrer">Learning journey</a>
-          <a href="https://learning.sap.com/courses/sap-cloud-platform-integration-service-overview" target="_blank" rel="noreferrer">CLD900</a>
-          <a href="https://learning.sap.com/helpcenter/certification-support/step-by-step-guide-practical-exams" target="_blank" rel="noreferrer">Practical exam guide</a>
-          <a href="https://www.sap.com/about/legal/trademark.html" target="_blank" rel="noreferrer">SAP trademark notes</a>
+          <a href="https://learning.sap.com/certifications" target="_blank" rel="noreferrer">SAP Certifications</a>
+          <a href="https://learning.sap.com/get-certified/reimagining-certification" target="_blank" rel="noreferrer">Practical exam changes</a>
+          <a href="https://help.sap.com/docs/hana-cloud-database" target="_blank" rel="noreferrer">SAP Help Portal</a>
+          <a href="https://www.sap.com/about/legal/trademark.html" target="_blank" rel="noreferrer">SAP trademarks</a>
         </div>
       </section>
     `;
   }
 
-  function renderDashboard() {
-    const stats = progressStats();
-    const next = nextChallengeIndex();
-    const recent = userState.activityLog.length
-      ? userState.activityLog.slice(0, 5).map((activity) => `
-          <div class="activity-row">
-            <span class="activity-dot"></span>
-            <div><strong>${esc(activity.text)}</strong><p>Saved to ${esc(activeProfile.name)}'s workspace</p></div>
-            <time>${relativeTime(activity.time)}</time>
-          </div>
-        `).join("")
-      : `<div class="empty-state"><h3>Your activity will appear here</h3><p>Complete a task, review a question, or create a note to begin your learning history.</p></div>`;
-
-    return `
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">C_CPI_2601 · Integration Developer</p>
-          <h2>Turn the syllabus into a spellbook you can actually use.</h2>
-          <p>Follow the quest map, practice system spells, brew through the HANA lab, capture notes, and face the final three-hour trial with less chaos.</p>
-          <div class="hero-actions">
-            <button class="button button-primary" data-route="simulator" data-open-challenge="${next}" type="button">Continue spell practice ${icon("arrow")}</button>
-            <button class="button button-secondary" data-route="roadmap" type="button">Open Quest Map</button>
-          </div>
-        </div>
-        <div class="hero-score">
-          <div class="readiness-ring" style="--score:${stats.readiness}">
-            <div><strong>${stats.readiness}%</strong><span>Readiness</span></div>
-          </div>
-          <p class="score-caption">${stats.readiness >= 80 ? "Assessment rehearsal phase" : "Keep building practical fluency"}</p>
-        </div>
-      </section>
-
-      <section class="metric-grid">
-        ${metricCard("roadmap", `${Object.values(userState.roadmap).filter(Boolean).length}/${roadmapDays.length}`, "Quest days complete")}
-        ${metricCard("lab", `${Object.values(userState.simPassed).filter(Boolean).length}/${systemChallenges.length}`, "Simulator spells passed")}
-        ${metricCard("hana", `${Object.values(userState.hanaPassed || {}).filter(Boolean).length}/${hanaBuildTasks.length}`, "Potion builds checked")}
-        ${metricCard("questions", `${Object.keys(userState.qaReviewed).length}/${qaItems.length}`, "Oracle answers reviewed")}
-        ${metricCard("notes", String(notes.length), "Spellbook notes")}
-      </section>
-
-      <section class="dashboard-grid">
-        <div class="panel">
-          <div class="panel-head">
-            <div><h3>Continue where you left off</h3><p>Your next incomplete system-based task</p></div>
-            <span class="tag">${stats.simulator}% practical</span>
-          </div>
-          <div class="panel-body">
-            <div class="continue-card">
-              <span class="continue-number">${String(next + 1).padStart(2, "0")}</span>
-              <div>
-                <h4>${esc(systemChallenges[next].title)}</h4>
-                <p>${esc(systemChallenges[next].prompt)}</p>
-              </div>
-              <button class="button button-primary button-small" data-route="simulator" data-open-challenge="${next}" type="button">Open task</button>
-            </div>
-            <div class="progress-list" style="margin-top:20px">
-              ${progressLine("Quest Map", stats.roadmap)}
-              ${progressLine("Spell Simulator", stats.simulator)}
-              ${progressLine("HANA Potion Lab", stats.hana)}
-              ${progressLine("Guided Scrolls", stats.walkthrough)}
-              ${progressLine("Milestone Moons", stats.landmark)}
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head">
-            <div><h3>Recent activity</h3><p>Latest actions in this device profile</p></div>
-          </div>
-          <div class="panel-body activity-feed">${recent}</div>
-        </div>
-      </section>
-
-      <section style="margin-top:20px">
-        <div class="section-heading">
-          <div><p class="eyebrow">Your spell desk</p><h2 style="font-size:1.6rem">Everything needed for deliberate practice</h2></div>
-        </div>
-        <div class="feature-grid">
-          ${featureCard("lab", "Spell Simulator", "Twelve original, exam-aligned scenarios for Cloud Integration, API Management, Event Mesh, monitoring, and architecture.", "simulator")}
-          ${featureCard("hana", "HANA Potion Lab", "Practice the uploaded runbook in a HANA-style cockpit with SQL-console checks.", "hana")}
-          ${featureCard("steps", "Guided Scrolls", "Check off every action in eight practical walkthroughs and keep the exact workflow fresh.", "walkthroughs")}
-          ${featureCard("notes", "Spellbook Notes", "Write, search, edit, and export notes that remain separate for each device profile.", "notes")}
-        </div>
-      </section>
-      ${sourceStrip()}
-    `;
+  function showToast(message, type = "") {
+    const stack = document.getElementById("toastStack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    stack.appendChild(toast);
+    setTimeout(() => toast.remove(), 2600);
   }
 
-  function metricCard(iconName, value, label) {
-    return `<div class="metric-card"><div class="metric-head"><span class="metric-icon">${icon(iconName)}</span></div><strong>${esc(value)}</strong><p>${esc(label)}</p></div>`;
-  }
-
-  function progressLine(label, value) {
-    return `
-      <div class="progress-line">
-        <div class="progress-copy"><strong>${esc(label)}</strong><span>${value === 100 ? "Complete" : "In progress"}</span></div>
-        <div class="progress-track"><div class="progress-fill" style="width:${value}%"></div></div>
-        <span class="progress-value">${value}%</span>
-      </div>
-    `;
-  }
-
-  function featureCard(iconName, title, description, route) {
-    return `
-      <article class="feature-card">
-        <span class="metric-icon">${icon(iconName)}</span>
-        <h3>${esc(title)}</h3>
-        <p>${esc(description)}</p>
-        <button class="text-link" data-route="${route}" type="button">Open section →</button>
-      </article>
-    `;
-  }
-
-  function renderRoadmap() {
-    const done = Object.values(userState.roadmap).filter(Boolean).length;
-    const remainingMinutes = roadmapDays.reduce((sum, day, index) => {
-      if (userState.roadmap[index]) return sum;
-      return sum + Number(day[2].split(" ")[0]);
-    }, 0);
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">14-day preparation route</p><h2>Quest Map</h2><p>Move from official concepts to timed tenant work. Mark days complete as you finish the full objective, not when you merely open the material.</p></div>
-        <div class="heading-actions"><button class="button button-secondary" data-reset-roadmap type="button">Reset quest map</button></div>
-      </div>
-      <div class="roadmap-layout">
-        <section class="panel">
-          <div class="panel-head"><div><h3>Your schedule</h3><p>${done} of ${roadmapDays.length} days completed</p></div><span class="tag">${percent(done, roadmapDays.length)}%</span></div>
-          <div class="roadmap-list">
-            ${roadmapDays.map((day, index) => `
-              <article class="roadmap-day ${userState.roadmap[index] ? "completed" : ""}">
-                <button class="roadmap-check" data-roadmap="${index}" type="button" aria-label="Toggle day ${index + 1}">${userState.roadmap[index] ? "✓" : index + 1}</button>
-                <div><h3>${esc(day[0])}</h3><p>${esc(day[1])}</p></div>
-                <span class="roadmap-time">${esc(day[2])}</span>
-              </article>
-            `).join("")}
-          </div>
-        </section>
-        <aside class="panel sticky-panel">
-          <div class="panel-head"><div><h3>Quest summary</h3><p>Based on your checked days</p></div></div>
-          <div class="panel-body study-summary">
-            <div class="summary-stat"><span>Completed</span><strong>${done} days</strong></div>
-            <div class="summary-stat"><span>Remaining</span><strong>${roadmapDays.length - done} days</strong></div>
-            <div class="summary-stat"><span>Estimated time</span><strong>${Math.floor(remainingMinutes / 60)}h ${remainingMinutes % 60}m</strong></div>
-            <div class="summary-stat"><span>Practical days</span><strong>7 of 14</strong></div>
-            <div class="callout">A system-based assessment rewards reliable execution. Repeat the tasks that feel slow even after you understand the concept.</div>
-            <button class="button button-primary" data-route="simulator" type="button">Open Spell Simulator</button>
-          </div>
-        </aside>
-      </div>
-    `;
-  }
-
-  function renderSimulator() {
-    if (currentChallenge >= systemChallenges.length) currentChallenge = 0;
-    const challenge = systemChallenges[currentChallenge];
-    const passed = Object.values(userState.simPassed).filter(Boolean).length;
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">Guided practical environment</p><h2>Spell Simulator</h2><p>Complete twelve original scenarios built around the current CLD900 learning objectives. Guided mode gives hints and exact feedback.</p></div>
-        <div class="heading-actions"><span class="tag green">${passed}/${systemChallenges.length} passed</span><button class="button button-secondary" data-route="mock" type="button">Open Final Boss Trial</button></div>
-      </div>
-      <div class="simulator-layout">
-        <aside class="challenge-list">
-          ${systemChallenges.map((item, index) => `
-            <button class="challenge-button ${index === currentChallenge ? "active" : ""} ${userState.simPassed[item.id] ? "passed" : ""}" data-challenge="${index}" type="button">
-              <span class="challenge-index">${userState.simPassed[item.id] ? "✓" : String(index + 1).padStart(2, "0")}</span>
-              <span><strong>${esc(item.title)}</strong><small>${esc(item.domain)} · ${esc(item.difficulty)}</small></span>
-              <span class="challenge-status">${userState.simPassed[item.id] ? "●" : ""}</span>
-            </button>
-          `).join("")}
-        </aside>
-        <section class="challenge-workspace">
-          ${challengeWorkspace(challenge, "guided")}
-        </section>
-      </div>
-    `;
-  }
-
-  function challengeWorkspace(challenge, mode) {
-    const isMock = mode === "mock";
-    const answerStore = isMock ? userState.mock.answers : userState.simAnswers;
-    const feedbackStore = isMock ? {} : userState.simFeedback;
-    const answer = answerStore[challenge.id] || (challenge.type === "multi" || challenge.type === "sequence" ? [] : {});
-    const feedback = feedbackStore[challenge.id];
-    return `
-      <header class="sim-brief">
-        <div class="sim-status"><span class="pulse-dot"></span>${esc(challenge.area)} · ${esc(challenge.difficulty)}</div>
-        <h2>${esc(challenge.title)}</h2>
-        <p>${esc(challenge.prompt)}</p>
-      </header>
-      <div class="sim-content">
-        <div class="task-instructions"><strong>Task</strong><p>${esc(challenge.instructions)}</p></div>
-        <div class="tenant-frame">
-          <div class="tenant-bar"><div class="tenant-brand"><span class="tenant-mark">IS</span>Integration Suite</div><span class="tenant-tag">CERT-PREP · DEV</span></div>
-          <div class="tenant-page">
-            <div class="tenant-title"><h3>${esc(challenge.area)}</h3><p>Assessment activity ${systemChallenges.indexOf(challenge) + 1} of ${systemChallenges.length}</p></div>
-            ${challengeInput(challenge, answer, mode)}
-          </div>
-        </div>
-        ${!isMock && feedback ? `<div class="feedback ${feedback.pass ? "success" : "error"}">${esc(feedback.message)}</div>` : ""}
-        ${!isMock && feedback?.hint ? `<div class="hint-box"><strong>Hint:</strong> ${esc(challenge.hint)}</div>` : ""}
-        <div class="form-actions">
-          <div class="challenge-nav">
-            <button class="button button-soft button-small" data-challenge-prev type="button" ${currentChallenge === 0 ? "disabled" : ""}>Previous</button>
-            <button class="button button-soft button-small" data-challenge-next type="button" ${currentChallenge === systemChallenges.length - 1 ? "disabled" : ""}>Next</button>
-          </div>
-          <div class="challenge-nav">
-            ${!isMock ? '<button class="button button-secondary button-small" data-show-hint type="button">Show hint</button><button class="button button-primary" data-check-challenge type="button">Check task</button>' : ""}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function challengeInput(challenge, answer, mode) {
-    const prefix = mode === "mock" ? "mock" : "sim";
-    if (challenge.type === "fields") {
-      return `<div class="form-grid">${challenge.fields.map((field) => {
-        const [key, label, type, placeholder, options] = field;
-        const value = answer[key] ?? "";
-        if (type === "select") {
-          return `<label class="field"><span>${esc(label)}</span><select data-${prefix}-field="${esc(key)}">${options.map((option) => `<option ${value === option ? "selected" : ""}>${esc(option)}</option>`).join("")}</select></label>`;
-        }
-        if (type === "textarea") {
-          return `<label class="field full"><span>${esc(label)}</span><textarea data-${prefix}-field="${esc(key)}" placeholder="${esc(placeholder)}">${esc(value)}</textarea></label>`;
-        }
-        return `<label class="field"><span>${esc(label)}</span><input type="${type}" data-${prefix}-field="${esc(key)}" value="${esc(value)}" placeholder="${esc(placeholder)}"></label>`;
-      }).join("")}</div>`;
-    }
-
-    if (challenge.type === "single" || challenge.type === "log-single") {
-      return `
-        ${challenge.log ? `<div class="log-console">${esc(challenge.log)}</div>` : ""}
-        <div class="choice-grid" style="${challenge.log ? "margin-top:14px" : ""}">
-          ${challenge.options.map((option, index) => `
-            <button class="choice-card ${answer === index ? "selected" : ""}" data-${prefix}-single="${index}" type="button">
-              <span class="choice-marker">${answer === index ? "✓" : ""}</span>
-              <span><strong>${esc(option[0])}</strong><p>${esc(option[1])}</p></span>
-            </button>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    if (challenge.type === "multi") {
-      return `<div class="choice-grid">${challenge.options.map((option, index) => {
-        const selected = Array.isArray(answer) && answer.includes(index);
-        return `
-          <button class="choice-card multi ${selected ? "selected" : ""}" data-${prefix}-multi="${index}" type="button">
-            <span class="choice-marker">${selected ? "✓" : ""}</span>
-            <span><strong>${esc(option[0])}</strong><p>${esc(option[1])}</p></span>
-          </button>
-        `;
-      }).join("")}</div>`;
-    }
-
-    if (challenge.type === "sequence") {
-      const selected = Array.isArray(answer) ? answer : [];
-      const available = challenge.options.filter((option) => !selected.includes(option));
-      return `
-        <p class="eyebrow">Available actions</p>
-        <div class="sequence-pool">
-          ${available.length ? available.map((option) => `<button class="sequence-chip" data-${prefix}-sequence-add="${esc(option)}" type="button">${esc(option)}</button>`).join("") : '<span class="sequence-placeholder">All actions selected</span>'}
-        </div>
-        <p class="eyebrow" style="margin-top:14px">Your sequence</p>
-        <div class="sequence-answer">
-          ${selected.length ? selected.map((option, index) => `<button class="sequence-chip" data-${prefix}-sequence-remove="${index}" type="button">${index + 1}. ${esc(option)} ×</button>`).join("") : '<span class="sequence-placeholder">Choose actions above in execution order</span>'}
-        </div>
-      `;
-    }
-
-    if (challenge.type === "mapping") {
-      return `
-        <table class="mapping-table">
-          <thead><tr><th>Source Field</th><th>Target Element</th></tr></thead>
-          <tbody>
-            ${challenge.rows.map((row) => `<tr><td>${esc(row[0])}</td><td><input data-${prefix}-field="${esc(row[0])}" value="${esc(answer[row[0]] || "")}" placeholder="${esc(row[1])}"></td></tr>`).join("")}
-          </tbody>
-        </table>
-      `;
-    }
-    return "";
-  }
-
-  function validateChallenge(challenge, answer) {
-    if (challenge.type === "single" || challenge.type === "log-single") {
-      return answer === challenge.expected;
-    }
-    if (challenge.type === "multi") {
-      const actual = Array.isArray(answer) ? [...answer].sort() : [];
-      return JSON.stringify(actual) === JSON.stringify([...challenge.expected].sort());
-    }
-    if (challenge.type === "sequence") {
-      return JSON.stringify(answer || []) === JSON.stringify(challenge.expected);
-    }
-    const expected = challenge.expected;
-    return Object.keys(expected).every((key) => {
-      return String(answer?.[key] ?? "").trim().toLowerCase() === String(expected[key]).trim().toLowerCase();
-    });
-  }
-
-  function normalizeTypedAnswer(value) {
-    return String(value || "")
-      .replace(/[“”]/g, '"')
-      .replace(/[‘’]/g, "'")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toUpperCase();
-  }
-
-  function requirementMatches(answer, requirement) {
-    const normalized = normalizeTypedAnswer(answer);
-    return String(requirement)
-      .split("|")
-      .some((option) => normalized.includes(normalizeTypedAnswer(option)));
-  }
-
-  function evaluateHanaTask(task, answer) {
-    const missing = task.required.filter((requirement) => !requirementMatches(answer, requirement));
-    const forbidden = (task.avoid || []).filter((requirement) => requirementMatches(answer, requirement));
-    return {
-      pass: missing.length === 0 && forbidden.length === 0,
-      missing,
-      forbidden
-    };
-  }
-
-  function evaluateHanaQa(item, answer) {
-    const missing = item.required.filter((requirement) => !requirementMatches(answer, requirement));
-    return { pass: missing.length === 0, missing };
-  }
-
-  function hanaBuildState() {
-    const passed = userState.hanaPassed || {};
-    return {
-      tenant: passed.tenant ? "Running" : "Not built",
-      appUser: passed["app-user"] ? "Created" : "Missing",
-      customerTable: passed["customer-table"] ? "Ready" : "Missing",
-      activeView: passed["active-view"] ? "Ready" : "Missing",
-      reportUser: passed["report-user"] ? "Restricted" : "Missing",
-      backup: passed.backup && passed["backup-status"] ? "Verified" : "Pending",
-      cockpit: passed["cockpit-resource"] ? "Available" : "Unregistered",
-      audit: passed["audit-policy"] ? "Enabled" : "Missing"
-    };
-  }
-
-  function nextHanaTaskIndex() {
-    const index = hanaBuildTasks.findIndex((task) => !userState.hanaPassed?.[task.id]);
-    return index === -1 ? 0 : index;
-  }
-
-  function renderHanaLab() {
-    if (currentHanaTask >= hanaBuildTasks.length) currentHanaTask = 0;
-    const task = hanaBuildTasks[currentHanaTask];
-    const passedCount = Object.values(userState.hanaPassed || {}).filter(Boolean).length;
-    const qaPassed = Object.values(userState.hanaQaFeedback || {}).filter((item) => item?.pass).length;
-    return `
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Runbook potion bench</p>
-          <h2>HANA Potion Lab</h2>
-          <p>Work through the PDF in an assessment-style HANA workspace. Type SQL or cockpit evidence, validate it, and compare your answer with the runbook pattern.</p>
-        </div>
-        <div class="heading-actions">
-          <span class="tag green">${passedCount}/${hanaBuildTasks.length} builds correct</span>
-          <a class="button button-secondary" href="${RUNBOOK_PDF_PATH}" target="_blank" rel="noreferrer">Open PDF</a>
-        </div>
-      </div>
-
-      <section class="hana-hero panel">
-        <div>
-          <p class="eyebrow">Browser-only practice lab</p>
-          <h3>HANA cockpit + Database Explorer potion bench</h3>
-          <p>This lab checks your typed commands against the runbook. It is intentionally browser-only, so nothing is sent to a SAP HANA tenant.</p>
-        </div>
-        <div class="hana-score-card">
-          <strong>${Math.round((passedCount / hanaBuildTasks.length) * 100)}%</strong>
-          <span>Runbook build score</span>
-        </div>
-      </section>
-
-      <div class="hana-layout">
-        <aside class="challenge-list">
-          ${hanaBuildTasks.map(hanaTaskButton).join("")}
-        </aside>
-        <section class="hana-workbench">
-          ${hanaTaskWorkspace(task)}
-        </section>
-      </div>
-
-      <section class="hana-lower-grid">
-        <div class="panel">
-          <div class="panel-head"><div><h3>Potion checks</h3><p>${qaPassed}/${hanaQaItems.length} concept answers correct</p></div><span class="tag">${qaPassed}/${hanaQaItems.length}</span></div>
-          <div class="hana-qa-list">
-            ${hanaQaItems.map((item, index) => hanaQaCard(item, index)).join("")}
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><div><h3>Embedded runbook scroll</h3><p>Reference copy from your uploaded file</p></div></div>
-          <div class="pdf-frame-wrap">
-            <iframe title="SAP HANA SyBA Practice Build Runbook" src="${RUNBOOK_PDF_PATH}"></iframe>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function hanaTaskButton(item, index) {
-    const passed = Boolean(userState.hanaPassed?.[item.id]);
-    return `
-      <button class="challenge-button ${index === currentHanaTask ? "active" : ""} ${passed ? "passed" : ""}" data-hana-task="${index}" type="button">
-        <span class="challenge-index">${passed ? "✓" : String(index + 1).padStart(2, "0")}</span>
-        <span><strong>${esc(item.title)}</strong><small>${esc(item.context)} · ${esc(item.tool)}</small></span>
-        <span class="challenge-status">${passed ? "●" : ""}</span>
-      </button>
-    `;
-  }
-
-  function hanaTaskWorkspace(task) {
-    const answer = userState.hanaAnswers?.[task.id] || "";
-    const feedback = userState.hanaFeedback?.[task.id];
-    const state = hanaBuildState();
-    return `
-      <header class="sim-brief hana-brief">
-        <div class="sim-status"><span class="pulse-dot"></span>${esc(task.build)} · ${esc(task.context)}</div>
-        <h2>${esc(task.title)}</h2>
-        <p>${esc(task.prompt)}</p>
-      </header>
-      <div class="hana-env">
-        <div class="hana-window">
-          <div class="hana-window-bar"><span>Task document</span><strong>${esc(task.build)}</strong></div>
-          <div class="hana-window-body">
-            <p class="eyebrow">Objective</p>
-            <p>${esc(task.task)}</p>
-            <div class="callout"><strong>Hint:</strong> ${esc(task.hint)}</div>
-          </div>
-        </div>
-        <div class="hana-window">
-          <div class="hana-window-bar"><span>Virtual cockpit</span><strong>Lab state</strong></div>
-          <div class="hana-window-body hana-state-grid">
-            ${hanaStateRow("TRAININGDB", state.tenant)}
-            ${hanaStateRow("APP_USER", state.appUser)}
-            ${hanaStateRow("CUSTOMER_MASTER", state.customerTable)}
-            ${hanaStateRow("ACTIVE_CUSTOMERS_V", state.activeView)}
-            ${hanaStateRow("REPORT_USER", state.reportUser)}
-            ${hanaStateRow("Backup", state.backup)}
-            ${hanaStateRow("Cockpit resource", state.cockpit)}
-            ${hanaStateRow("Audit policy", state.audit)}
-          </div>
-        </div>
-        <div class="hana-window hana-console-window">
-          <div class="hana-window-bar"><span>Database Explorer / SQL Console</span><strong>${esc(task.tool)}</strong></div>
-          <div class="hana-window-body">
-            <textarea class="hana-console-input" data-hana-answer="${esc(task.id)}" spellcheck="false" placeholder="Type your SQL command or cockpit evidence here...">${esc(answer)}</textarea>
-            <div class="form-actions">
-              <div class="challenge-nav">
-                <button class="button button-soft button-small" data-hana-prev type="button" ${currentHanaTask === 0 ? "disabled" : ""}>Previous</button>
-                <button class="button button-soft button-small" data-hana-next type="button" ${currentHanaTask === hanaBuildTasks.length - 1 ? "disabled" : ""}>Next</button>
-              </div>
-              <div class="challenge-nav">
-                <button class="button button-secondary button-small" data-reset-hana-answer="${esc(task.id)}" type="button">Clear answer</button>
-                <button class="button button-primary" data-check-hana="${esc(task.id)}" type="button">Validate build</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      ${feedback ? hanaFeedbackBlock(task, feedback) : '<div class="hint-box">Type your command or cockpit evidence, then validate the build. The expected answer appears after each check.</div>'}
-    `;
-  }
-
-  function hanaStateRow(label, value) {
-    const positive = !/missing|pending|not built|unregistered/i.test(value);
-    return `<div class="summary-stat"><span>${esc(label)}</span><strong style="color:${positive ? "var(--green)" : "var(--muted)"}">${esc(value)}</strong></div>`;
-  }
-
-  function hanaFeedbackBlock(task, feedback) {
-    const missing = feedback.missing?.length ? `<p><strong>Missing:</strong> ${feedback.missing.map(esc).join(", ")}</p>` : "";
-    const forbidden = feedback.forbidden?.length ? `<p><strong>Remove:</strong> ${feedback.forbidden.map(esc).join(", ")}</p>` : "";
-    const message = feedback.pass ? HANA_FEEDBACK_COPY.pass : HANA_FEEDBACK_COPY.fail;
-    return `
-      <div class="feedback ${feedback.pass ? "success" : "error"}">
-        <strong>${feedback.pass ? "Build correct" : "Build needs repair"}</strong>
-        <p>${esc(message)}</p>
-        ${missing}
-        ${forbidden}
-      </div>
-      <div class="answer-panel hana-answer-panel">
-        <strong>Correct answer / expected evidence</strong>
-        <pre>${esc(task.expectedAnswer)}</pre>
-        <strong>Validation checks</strong>
-        <ul>${task.validation.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-      </div>
-    `;
-  }
-
-  function hanaQaCard(item, index) {
-    const answer = userState.hanaQaAnswers?.[item.id] || "";
-    const feedback = userState.hanaQaFeedback?.[item.id];
-    return `
-      <article class="hana-qa-card ${feedback?.pass ? "passed" : ""}">
-        <div class="card-kicker"><span class="tag">Q${index + 1}</span><span class="tag ${feedback?.pass ? "green" : ""}">${feedback ? (feedback.pass ? "Correct" : "Review") : "Unanswered"}</span></div>
-        <h3>${esc(item.question)}</h3>
-        <textarea data-hana-qa="${esc(item.id)}" placeholder="Type your answer...">${esc(answer)}</textarea>
-        <div class="card-actions">
-          <button class="button button-primary button-small" data-check-hana-qa="${esc(item.id)}" type="button">Check typed answer</button>
-        </div>
-        ${feedback ? `<div class="feedback ${feedback.pass ? "success" : "error"}"><strong>${feedback.pass ? "Typed answer is correct." : "Typed answer is not quite correct."}</strong><p>Correct answer: ${esc(item.answer)}</p></div>` : ""}
-      </article>
-    `;
-  }
-
-  function renderQuestions() {
-    const categories = ["All", ...new Set(qaItems.map((item) => item.category))];
-    const filtered = qaItems.filter((item) => {
-      const categoryMatch = qaFilter === "All" || item.category === qaFilter;
-      const query = qaSearch.trim().toLowerCase();
-      const textMatch = !query || `${item.question} ${item.answer} ${item.category}`.toLowerCase().includes(query);
-      return categoryMatch && textMatch;
-    });
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">Fast recall bank</p><h2>The SAP Oracle</h2><p>Use these original study prompts to explain the product behavior in your own words. Reveal an answer only after you commit to a response.</p></div>
-        <div class="heading-actions"><span class="tag">${Object.keys(userState.qaReviewed).length}/${qaItems.length} reviewed</span></div>
-      </div>
-      <div class="filter-bar">
-        <label class="search-wrap"><span>${icon("search")}</span><input class="search-input" id="qaSearch" value="${esc(qaSearch)}" placeholder="Search questions, answers, or domains"></label>
-        <div class="filter-group">${categories.map((category) => `<button class="filter-chip ${qaFilter === category ? "active" : ""}" data-qa-filter="${esc(category)}" type="button">${esc(category)}</button>`).join("")}</div>
-      </div>
-      <section class="qa-grid">
-        ${filtered.length ? filtered.map((item) => {
-          const revealed = Boolean(userState.qaReviewed[item.id]);
-          const colorClass = item.category === "Event Mesh" ? "purple" : item.category === "Operations" ? "orange" : item.category === "Architecture" ? "green" : "";
-          return `
-            <article class="question-card ${revealed ? "revealed" : ""}">
-              <div class="card-kicker"><span class="tag ${colorClass}">${esc(item.category)}</span><span class="tag">${qaItems.indexOf(item) + 1}</span></div>
-              <h3>${esc(item.question)}</h3>
-              ${revealed ? `<div class="answer-panel">${esc(item.answer)}</div>` : '<div class="answer-placeholder">Say your answer aloud, then reveal the explanation.</div>'}
-              <div class="card-actions"><button class="text-link" data-qa-reveal="${item.id}" type="button">${revealed ? "Hide answer" : "Reveal answer"}</button><button class="text-link" data-note-from-qa="${item.id}" type="button">Add to notes</button></div>
-            </article>
-          `;
-        }).join("") : '<div class="empty-state" style="grid-column:1/-1"><h3>No matching questions</h3><p>Try a broader search or select a different domain.</p></div>'}
-      </section>
-    `;
-  }
-
-  function renderWalkthroughs() {
-    const totalSteps = walkthroughs.reduce((sum, item) => sum + item.steps.length, 0);
-    const completed = Object.values(userState.walkSteps).filter(Boolean).length;
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">Task completion guides</p><h2>Guided Scrolls</h2><p>Check each action only after you can perform it yourself. The wording describes product workflows without reproducing confidential exam tasks.</p></div>
-        <div class="heading-actions"><span class="tag green">${completed}/${totalSteps} steps</span></div>
-      </div>
-      <section class="walkthrough-list">
-        ${walkthroughs.map((walkthrough, index) => {
-          const done = walkthrough.steps.filter((_, stepIndex) => userState.walkSteps[`${walkthrough.id}:${stepIndex}`]).length;
-          return `
-            <details class="walkthrough-card" ${done > 0 && done < walkthrough.steps.length ? "open" : ""}>
-              <summary>
-                <div class="walkthrough-summary">
-                  <div><span class="walkthrough-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${esc(walkthrough.title)}</h3><p>${esc(walkthrough.duration)} · ${walkthrough.steps.length} steps</p></div></div>
-                  <div class="walkthrough-progress"><strong>${done}/${walkthrough.steps.length}</strong><span>${done === walkthrough.steps.length ? "Complete" : "Steps complete"}</span></div>
-                </div>
-              </summary>
-              <div class="walkthrough-body">
-                <div class="walkthrough-objective"><strong>Objective:</strong> ${esc(walkthrough.objective)}</div>
-                <div class="step-list">
-                  ${walkthrough.steps.map((step, stepIndex) => {
-                    const key = `${walkthrough.id}:${stepIndex}`;
-                    const isDone = Boolean(userState.walkSteps[key]);
-                    return `<div class="step-row ${isDone ? "done" : ""}"><button class="step-check" data-walk-step="${key}" type="button">${isDone ? "✓" : stepIndex + 1}</button><div><strong>Step ${stepIndex + 1}</strong><p>${esc(step)}</p></div></div>`;
-                  }).join("")}
-                </div>
-                <div class="card-actions"><button class="button button-secondary button-small" data-note-from-walk="${walkthrough.id}" type="button">Add task notes</button><button class="button button-soft button-small" data-reset-walk="${walkthrough.id}" type="button">Reset steps</button></div>
-              </div>
-            </details>
-          `;
-        }).join("")}
-      </section>
-    `;
-  }
-
-  function renderLandmarks() {
-    const done = Object.values(userState.landmarks).filter(Boolean).length;
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">CLD900-aligned milestones</p><h2>Milestone Moons</h2><p>These five milestones follow the current official course units and help you see whether your practical preparation covers the full journey.</p></div>
-        <div class="heading-actions"><span class="tag green">${done}/${landmarks.length} complete</span></div>
-      </div>
-      <section class="landmark-grid">
-        ${landmarks.map((landmark) => {
-          const complete = Boolean(userState.landmarks[landmark.id]);
-          return `
-            <article class="landmark-card ${complete ? "complete" : ""}">
-              <div class="landmark-head"><span class="landmark-unit">${landmark.unit}</span><span class="tag ${complete ? "green" : ""}">${complete ? "Completed" : landmark.duration}</span></div>
-              <h3>${esc(landmark.title)}</h3>
-              <p>${esc(landmark.description)}</p>
-              <ul class="lesson-list">${landmark.lessons.map((lesson) => `<li>${esc(lesson)}</li>`).join("")}</ul>
-              <div class="card-actions"><button class="button ${complete ? "button-success" : "button-primary"} button-small" data-landmark="${landmark.id}" type="button">${complete ? "Completed ✓" : "Mark complete"}</button><button class="text-link" data-route="${landmark.id === "l-cloud" || landmark.id === "l-api" || landmark.id === "l-event" ? "simulator" : "questions"}" type="button">Practice this area →</button></div>
-            </article>
-          `;
-        }).join("")}
-      </section>
-      ${sourceStrip()}
-    `;
-  }
-
-  function renderChecklist() {
-    const allItems = [...baseChecklist, ...userState.customChecklist];
-    const groups = [...new Set(allItems.map((item) => item.group))];
-    const completed = allItems.filter((item) => userState.checklist[item.id]).length;
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">Preparation control</p><h2>Potion Checklist</h2><p>Use the built-in requirements and add your own. Every device profile has an independent checklist.</p></div>
-        <div class="heading-actions"><span class="tag green">${completed}/${allItems.length} checked</span><button class="button button-secondary" data-reset-checklist type="button">Reset checks</button></div>
-      </div>
-      <div class="checklist-layout">
-        <section class="panel">
-          ${groups.map((group) => `
-            <div class="check-group">
-              <h3>${esc(group)}</h3>
-              ${allItems.filter((item) => item.group === group).map((item) => {
-                const checked = Boolean(userState.checklist[item.id]);
-                return `
-                  <div class="check-row ${checked ? "checked" : ""}">
-                    <input type="checkbox" id="${esc(item.id)}" data-check-item="${esc(item.id)}" ${checked ? "checked" : ""}>
-                    <label for="${esc(item.id)}">${esc(item.text)}</label>
-                    ${item.custom ? `<button class="delete-check" data-delete-check="${esc(item.id)}" type="button" aria-label="Delete custom checklist item">×</button>` : ""}
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          `).join("")}
-        </section>
-        <aside class="panel sticky-panel">
-          <div class="panel-head"><div><h3>Add your own potion step</h3><p>Personalize your exam plan</p></div></div>
-          <div class="panel-body">
-            <form class="custom-check-form" id="customCheckForm">
-              <label for="customCheckGroup">Section</label>
-              <input id="customCheckGroup" maxlength="40" placeholder="For example: My weak areas" required>
-              <label for="customCheckText">Checklist item</label>
-              <input id="customCheckText" maxlength="180" placeholder="What must you complete?" required>
-              <button class="button button-primary" type="submit">${icon("plus")} Add item</button>
-            </form>
-            <div class="callout" style="margin-top:16px">A checked item means you can perform or explain it without relying on a click-by-click guide.</div>
-          </div>
-        </aside>
-      </div>
-    `;
-  }
-
-  function renderNotes() {
-    const filtered = notes.filter((note) => {
-      const query = noteSearch.trim().toLowerCase();
-      return !query || `${note.title} ${note.body} ${note.category}`.toLowerCase().includes(query);
-    });
-    const selected = notes.find((note) => note.id === selectedNoteId) || null;
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">Device-local knowledge base</p><h2>Spellbook Notes</h2><p>Capture exact syntax, troubleshooting findings, and task reminders. Notes are stored in IndexedDB under ${esc(activeProfile.name)}'s profile.</p></div>
-        <div class="heading-actions"><button class="button button-secondary" data-export-notes type="button">${icon("download")} Export JSON</button><button class="button button-primary" data-new-note type="button">${icon("plus")} New note</button></div>
-      </div>
-      <div class="filter-bar">
-        <label class="search-wrap"><span>${icon("search")}</span><input class="search-input" id="noteSearch" value="${esc(noteSearch)}" placeholder="Search your notes"></label>
-        <span class="tag">${notes.length} note${notes.length === 1 ? "" : "s"}</span>
-      </div>
-      <div class="notes-layout">
-        <section class="notes-list">
-          ${filtered.length ? filtered.map((note) => `
-            <article class="note-card ${note.id === selectedNoteId ? "active" : ""}" data-note-select="${esc(note.id)}">
-              <div class="note-meta"><span class="tag">${esc(note.category)}</span><time>${relativeTime(note.updatedAt)}</time></div>
-              <h3>${esc(note.title)}</h3>
-              <p>${esc(note.body || "Empty note")}</p>
-            </article>
-          `).join("") : '<div class="empty-state"><span class="metric-icon">' + icon("notes") + '</span><h3>No notes found</h3><p>Create a note for syntax, a difficult task, or a troubleshooting lesson.</p><button class="button button-primary" data-new-note type="button">Create first note</button></div>'}
-        </section>
-        <section class="panel note-editor">
-          ${selected ? noteEditor(selected) : `
-            <div class="empty-state">
-              <span class="metric-icon">${icon("notes")}</span>
-              <h3>Select or create a note</h3>
-              <p>Your edits are saved when you choose Save note.</p>
-              <button class="button button-primary" data-new-note type="button">New note</button>
-            </div>
-          `}
-        </section>
-      </div>
-    `;
-  }
-
-  function noteEditor(note) {
-    return `
-      <form id="noteForm">
-        <input type="hidden" id="noteId" value="${esc(note.id)}">
-        <label><span>Title</span><input id="noteTitle" maxlength="100" value="${esc(note.title)}" required></label>
-        <label><span>Category</span><select id="noteCategory">${["General", "Cloud Integration", "API Management", "Event Mesh", "Operations", "Architecture", "Exam day"].map((category) => `<option ${note.category === category ? "selected" : ""}>${esc(category)}</option>`).join("")}</select></label>
-        <label><span>Notes</span><textarea id="noteBody" placeholder="Write what you need to remember...">${esc(note.body)}</textarea></label>
-        <div class="form-actions"><button class="button button-danger button-small" data-delete-note="${esc(note.id)}" type="button">Delete</button><button class="button button-primary" type="submit">Save note</button></div>
-      </form>
-    `;
-  }
-
-  function renderMock() {
-    const mock = userState.mock;
-    if (mock.submitted) return renderMockResult();
-    if (!mock.active) {
-      return `
-        <section class="mock-welcome">
-          <div>
-            <p class="eyebrow" style="color:#ffaf6b">Final Boss Trial</p>
-            <h2>Twelve activities. Three hours. One deliberate attempt.</h2>
-            <p>The trial reuses the system scenarios without hints or immediate feedback. Your guided answers remain untouched.</p>
-            <ul class="mock-rule-list">
-              <li>Read every activity before configuring answers.</li>
-              <li>Exact aliases, paths, rates, names, and topic values matter.</li>
-              <li>Use the timer and reserve thirty minutes for review.</li>
-              <li>Submission reveals a task-by-task result and saves the attempt.</li>
-            </ul>
-            <button class="button button-warning" data-start-mock type="button">Start Final Boss Trial</button>
-          </div>
-          <div class="mock-clock"><div><strong>03:00:00</strong><span>Trial time</span></div></div>
-        </section>
-      `;
-    }
-    const challenge = systemChallenges[mock.current || 0];
-    return `
-      <div class="section-heading">
-        <div><p class="eyebrow">Countdown active</p><h2>Final Boss Trial in progress</h2><p>Answers save automatically to this device profile. Feedback remains hidden until submission.</p></div>
-        <div class="heading-actions"><button class="button button-warning" data-submit-mock type="button">Submit trial</button></div>
-      </div>
-      <div class="mock-active">
-        <aside class="challenge-list">
-          ${systemChallenges.map((item, index) => `
-            <button class="challenge-button ${index === mock.current ? "active" : ""}" data-mock-challenge="${index}" type="button">
-              <span class="challenge-index">${String(index + 1).padStart(2, "0")}</span>
-              <span><strong>${esc(item.title)}</strong><small>${esc(item.domain)}</small></span>
-            </button>
-          `).join("")}
-        </aside>
-        <section class="mock-card">
-          <div class="mock-topline"><strong>Activity ${(mock.current || 0) + 1} of ${systemChallenges.length}</strong><span>Feedback hidden</span></div>
-          ${challengeWorkspace(challenge, "mock").replace(
-            '<div class="challenge-nav">\n            \n          </div>',
-            `<div class="challenge-nav"><button class="button button-warning" data-submit-mock type="button">Submit trial</button></div>`
-          )}
-        </section>
-      </div>
-    `;
-  }
-
-  function renderMockResult() {
-    const mock = userState.mock;
-    const passed = Object.values(mock.passed).filter(Boolean).length;
-    const score = percent(passed, systemChallenges.length);
-    return `
-      <section class="mock-card mock-result">
-        <div class="result-score">${score}%</div>
-        <p class="eyebrow">Attempt complete</p>
-        <h2>${score === 100 ? "Every simulated task passed" : "Your repair list is ready"}</h2>
-        <p>${passed} of ${systemChallenges.length} activities passed exact validation. Use the breakdown to repeat weak workflows in guided mode.</p>
-        <div class="result-breakdown">
-          ${systemChallenges.map((challenge, index) => `<div class="result-row"><span>${index + 1}. ${esc(challenge.title)}</span><strong style="color:${mock.passed[challenge.id] ? "var(--green)" : "var(--red)"}">${mock.passed[challenge.id] ? "Pass" : "Review"}</strong></div>`).join("")}
-        </div>
-        <div class="heading-actions" style="justify-content:center">
-          <button class="button button-secondary" data-review-mock type="button">Review in guided mode</button>
-          <button class="button button-warning" data-restart-mock type="button">Start another trial</button>
-        </div>
-      </section>
-    `;
-  }
-
-  function relativeTime(timestamp) {
-    const seconds = Math.max(1, Math.round((Date.now() - timestamp) / 1000));
-    if (seconds < 60) return "now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-  }
-
-  function formatTime(milliseconds) {
-    const total = Math.max(0, Math.ceil(milliseconds / 1000));
-    const hours = String(Math.floor(total / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
-    const seconds = String(total % 60).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
+  function setStream(id) {
+    if (!streams[id]) return;
+    activeStreamId = id;
+    localStorage.setItem(STREAM_KEY, id);
+    simulatorIndex = 0;
+    progress(id);
+    saveState();
+    renderRoute();
+    showToast(`${streams[id].shortLabel} spellbook opened.`, "success");
   }
 
   function updateTimer() {
-    const pill = document.getElementById("timerPill");
-    const timer = document.getElementById("globalTimer");
-    if (!userState?.mock?.active || userState.mock.submitted) {
-      pill.hidden = true;
-      clearInterval(timerInterval);
-      timerInterval = null;
+    const boss = progress().boss;
+    if (!boss.active) {
+      timerPill.hidden = true;
+      clearInterval(bossTicker);
+      bossTicker = null;
       return;
     }
-    pill.hidden = false;
-    const remaining = userState.mock.endAt - Date.now();
-    timer.textContent = formatTime(remaining);
+    const remaining = Math.max(0, Math.ceil((boss.endAt - Date.now()) / 1000));
+    globalTimer.textContent = formatSeconds(remaining);
+    timerPill.hidden = false;
     if (remaining <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      submitMock(true);
+      boss.active = false;
+      boss.history.unshift({ completed: Object.values(boss.completed || {}).filter(Boolean).length, endedAt: Date.now(), reason: "expired" });
+      saveState();
+      showToast("Time expired. Trial closed.", "error");
+      renderRoute();
       return;
     }
-    if (!timerInterval) timerInterval = setInterval(updateTimer, 1000);
+    if (!bossTicker) bossTicker = setInterval(updateTimer, 1000);
   }
 
-  async function renderProfiles() {
-    const profiles = (await dbGetAll("profiles")).sort((a, b) => b.lastLogin - a.lastLogin);
-    document.getElementById("profileList").innerHTML = profiles.map((profile) => `
-      <div class="profile-row">
-        <span class="avatar">${esc(profile.initials)}</span>
-        <div><strong>${esc(profile.name)}</strong><small>${profile.id === activeProfile.id ? "Current profile" : profile.pinHash ? "PIN protected" : "Open profile"}</small></div>
-        <button class="button button-small ${profile.id === activeProfile.id ? "button-success" : "button-secondary"}" data-open-profile="${esc(profile.id)}" type="button">${profile.id === activeProfile.id ? "Active" : "Open"}</button>
-      </div>
-    `).join("");
-  }
-
-  function confirmDialog(title, message, action) {
-    document.getElementById("confirmTitle").textContent = title;
-    document.getElementById("confirmMessage").textContent = message;
-    confirmAction = action;
-    document.getElementById("confirmDialog").showModal();
-  }
-
-  async function createNote({ title = "Untitled note", category = "General", body = "" } = {}) {
-    const note = {
-      id: crypto.randomUUID(),
-      userId: activeProfile.id,
-      title,
-      category,
-      body,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-    await dbPut("notes", note);
-    notes.unshift(note);
-    selectedNoteId = note.id;
-    logActivity(`Created note: ${title}`);
-    await saveUserState();
-    setRoute("notes");
-  }
-
-  async function submitMock(auto = false) {
-    if (!userState.mock.active || userState.mock.submitted) return;
-    const passed = {};
-    systemChallenges.forEach((challenge) => {
-      passed[challenge.id] = validateChallenge(challenge, userState.mock.answers[challenge.id]);
-    });
-    const score = percent(Object.values(passed).filter(Boolean).length, systemChallenges.length);
-    userState.mock.passed = passed;
-    userState.mock.active = false;
-    userState.mock.submitted = true;
-    userState.mock.history.unshift({
-      id: crypto.randomUUID(),
-      submittedAt: Date.now(),
-      score,
-      auto
-    });
-    userState.mock.history = userState.mock.history.slice(0, 10);
-    logActivity(`Completed the Final Boss Trial with ${score}%`);
-    await saveUserState();
-    showToast(auto ? "Time expired. The mock was submitted automatically." : "Mock assessment submitted.", auto ? "error" : "success");
-    renderRoute();
-  }
-
-  function getAnswerStore(mode) {
-    return mode === "mock" ? userState.mock.answers : userState.simAnswers;
-  }
-
-  function updateAnswer(mode, challenge, updater) {
-    const store = getAnswerStore(mode);
-    const current = store[challenge.id];
-    store[challenge.id] = updater(current);
-    saveUserState();
-  }
-
-  function refreshChallengeOnly(mode = "guided") {
-    if (mode === "mock") renderRoute();
-    else document.querySelector(".challenge-workspace").innerHTML = challengeWorkspace(systemChallenges[currentChallenge], "guided");
-  }
-
-  async function handleClick(event) {
-    const nav = event.target.closest("[data-nav]");
-    if (nav) {
+  function handleClick(event) {
+    const route = event.target.closest("[data-route]");
+    if (route) {
       event.preventDefault();
-      setRoute(nav.dataset.nav);
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("sidebarScrim").hidden = true;
+      goTo(route.dataset.route);
       return;
     }
 
-    const routeButton = event.target.closest("[data-route]");
-    if (routeButton) {
-      if (routeButton.dataset.openChallenge !== undefined) currentChallenge = Number(routeButton.dataset.openChallenge);
-      setRoute(routeButton.dataset.route);
+    const streamButton = event.target.closest("[data-stream]");
+    if (streamButton) {
+      setStream(streamButton.dataset.stream);
       return;
     }
 
-    if (event.target.closest("#themeButton")) {
-      applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+    const questButton = event.target.closest("[data-quest]");
+    if (questButton) {
+      const p = progress();
+      const index = questButton.dataset.quest;
+      p.quests[index] = (Number(p.quests[index] || 0) + 1) % statusLabels.length;
+      p.lastRune = `${stream().questMap[index][0]} -> ${statusLabels[p.quests[index]]}`;
+      saveState();
+      renderRoute();
+      return;
+    }
+
+    const labButton = event.target.closest("[data-lab]");
+    if (labButton) {
+      const p = progress();
+      const index = labButton.dataset.lab;
+      p.labs[index] = !p.labs[index];
+      p.lastRune = `${stream().tasks[index].name} ${p.labs[index] ? "mastered" : "reopened"}`;
+      saveState();
+      renderRoute();
+      return;
+    }
+
+    const simChoice = event.target.closest("[data-sim-choice]");
+    if (simChoice) {
+      const s = stream();
+      const p = progress();
+      const scenario = s.simulator[simulatorIndex % s.simulator.length];
+      const choice = Number(simChoice.dataset.simChoice);
+      p.simulator[scenario[0]] = { choice, correct: choice === scenario[2] };
+      p.lastRune = `${scenario[0]} -> ${choice === scenario[2] ? "correct" : "review"}`;
+      saveState();
+      renderRoute();
+      return;
+    }
+
+    if (event.target.closest("[data-sim-next]")) {
+      simulatorIndex = (simulatorIndex + 1) % stream().simulator.length;
+      renderRoute();
+      return;
+    }
+
+    if (event.target.closest("[data-sim-random]")) {
+      simulatorIndex = Math.floor(Math.random() * stream().simulator.length);
+      renderRoute();
+      return;
+    }
+
+    if (event.target.closest("[data-boss-start]")) {
+      const boss = progress().boss;
+      boss.active = true;
+      boss.endAt = Date.now() + BOSS_SECONDS * 1000;
+      boss.completed = {};
+      saveState();
+      renderRoute();
+      showToast("Final Boss Trial started.", "success");
+      return;
+    }
+
+    if (event.target.closest("[data-boss-submit]")) {
+      const boss = progress().boss;
+      boss.active = false;
+      boss.history.unshift({ completed: Object.values(boss.completed || {}).filter(Boolean).length, endedAt: Date.now(), reason: "submitted" });
+      progress().lastRune = "Final Boss Trial submitted";
+      saveState();
+      renderRoute();
+      showToast("Trial submitted. Repair list ready.", "success");
+      return;
+    }
+
+    const themeButton = event.target.closest("#themeButton");
+    if (themeButton) {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem(THEME_KEY, next);
+      themeButton.innerHTML = `<span data-icon="${next === "dark" ? "moon" : "sun"}"></span>`;
+      hydrateIcons();
       return;
     }
 
@@ -2013,610 +1085,54 @@ SELECT * FROM SYS.AUDIT_POLICIES WHERE POLICY_NAME = 'AUDIT_APP_USER_LOGIN';`,
     if (event.target.closest("#sidebarScrim")) {
       document.getElementById("sidebar").classList.remove("open");
       document.getElementById("sidebarScrim").hidden = true;
-      return;
-    }
-
-    if (event.target.closest("#profileButton")) {
-      await renderProfiles();
-      document.getElementById("profileDialog").showModal();
-      return;
-    }
-
-    const openProfile = event.target.closest("[data-open-profile]");
-    if (openProfile) {
-      const profile = await dbGet("profiles", openProfile.dataset.openProfile);
-      if (!profile || profile.id === activeProfile.id) return;
-      if (profile.pinHash) {
-        document.getElementById("pinProfileId").value = profile.id;
-        document.getElementById("pinTitle").textContent = `Open ${profile.name}`;
-        document.getElementById("pinError").textContent = "";
-        document.getElementById("profileDialog").close();
-        document.getElementById("pinDialog").showModal();
-      } else {
-        document.getElementById("profileDialog").close();
-        await loadProfile(profile);
-        showToast(`Opened ${profile.name}'s workspace.`, "success");
-      }
-      return;
-    }
-
-    const roadmapButton = event.target.closest("[data-roadmap]");
-    if (roadmapButton) {
-      const index = roadmapButton.dataset.roadmap;
-      userState.roadmap[index] = !userState.roadmap[index];
-      if (userState.roadmap[index]) logActivity(`Completed roadmap day ${Number(index) + 1}`);
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-reset-roadmap]")) {
-      confirmDialog("Reset Quest Map?", "This clears all fourteen day-completion checks for the current profile.", async () => {
-        userState.roadmap = {};
-        await saveUserState();
-        renderRoute();
-      });
-      return;
-    }
-
-    const challengeButton = event.target.closest("[data-challenge]");
-    if (challengeButton) {
-      currentChallenge = Number(challengeButton.dataset.challenge);
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-challenge-prev]")) {
-      currentChallenge = Math.max(0, currentChallenge - 1);
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-challenge-next]")) {
-      currentChallenge = Math.min(systemChallenges.length - 1, currentChallenge + 1);
-      renderRoute();
-      return;
-    }
-
-    const simSingle = event.target.closest("[data-sim-single]");
-    if (simSingle) {
-      const challenge = systemChallenges[currentChallenge];
-      userState.simAnswers[challenge.id] = Number(simSingle.dataset.simSingle);
-      await saveUserState();
-      refreshChallengeOnly();
-      return;
-    }
-
-    const simMulti = event.target.closest("[data-sim-multi]");
-    if (simMulti) {
-      const challenge = systemChallenges[currentChallenge];
-      const index = Number(simMulti.dataset.simMulti);
-      const answer = Array.isArray(userState.simAnswers[challenge.id]) ? [...userState.simAnswers[challenge.id]] : [];
-      const position = answer.indexOf(index);
-      if (position >= 0) answer.splice(position, 1);
-      else answer.push(index);
-      userState.simAnswers[challenge.id] = answer;
-      await saveUserState();
-      refreshChallengeOnly();
-      return;
-    }
-
-    const simSeqAdd = event.target.closest("[data-sim-sequence-add]");
-    if (simSeqAdd) {
-      const challenge = systemChallenges[currentChallenge];
-      const answer = Array.isArray(userState.simAnswers[challenge.id]) ? [...userState.simAnswers[challenge.id]] : [];
-      answer.push(simSeqAdd.dataset.simSequenceAdd);
-      userState.simAnswers[challenge.id] = answer;
-      await saveUserState();
-      refreshChallengeOnly();
-      return;
-    }
-
-    const simSeqRemove = event.target.closest("[data-sim-sequence-remove]");
-    if (simSeqRemove) {
-      const challenge = systemChallenges[currentChallenge];
-      const answer = Array.isArray(userState.simAnswers[challenge.id]) ? [...userState.simAnswers[challenge.id]] : [];
-      answer.splice(Number(simSeqRemove.dataset.simSequenceRemove), 1);
-      userState.simAnswers[challenge.id] = answer;
-      await saveUserState();
-      refreshChallengeOnly();
-      return;
-    }
-
-    if (event.target.closest("[data-show-hint]")) {
-      const challenge = systemChallenges[currentChallenge];
-      userState.simFeedback[challenge.id] = { pass: false, message: "Hint revealed. Try the task again before checking.", hint: true };
-      await saveUserState();
-      refreshChallengeOnly();
-      return;
-    }
-
-    if (event.target.closest("[data-check-challenge]")) {
-      const challenge = systemChallenges[currentChallenge];
-      const pass = validateChallenge(challenge, userState.simAnswers[challenge.id]);
-      userState.simPassed[challenge.id] = pass;
-      userState.simFeedback[challenge.id] = {
-        pass,
-        message: pass ? "Task passed exact validation. You can move to the next activity." : "This configuration does not yet match every requested value. Re-read the task and use the hint if needed.",
-        hint: false
-      };
-      if (pass) logActivity(`Passed simulator task: ${challenge.title}`);
-      await saveUserState();
-      showToast(pass ? "System task passed." : "Task needs another review.", pass ? "success" : "error");
-      renderRoute();
-      return;
-    }
-
-    const hanaTaskButton = event.target.closest("[data-hana-task]");
-    if (hanaTaskButton) {
-      currentHanaTask = Number(hanaTaskButton.dataset.hanaTask);
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-hana-prev]")) {
-      currentHanaTask = Math.max(0, currentHanaTask - 1);
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-hana-next]")) {
-      currentHanaTask = Math.min(hanaBuildTasks.length - 1, currentHanaTask + 1);
-      renderRoute();
-      return;
-    }
-
-    const resetHana = event.target.closest("[data-reset-hana-answer]");
-    if (resetHana) {
-      const id = resetHana.dataset.resetHanaAnswer;
-      delete userState.hanaAnswers[id];
-      delete userState.hanaFeedback[id];
-      delete userState.hanaPassed[id];
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const checkHana = event.target.closest("[data-check-hana]");
-    if (checkHana) {
-      const task = hanaBuildTasks.find((item) => item.id === checkHana.dataset.checkHana);
-      if (!task) return;
-      const result = evaluateHanaTask(task, userState.hanaAnswers[task.id] || "");
-      userState.hanaPassed[task.id] = result.pass;
-      userState.hanaFeedback[task.id] = {
-        ...result,
-        message: result.pass ? HANA_FEEDBACK_COPY.pass : HANA_FEEDBACK_COPY.fail
-      };
-      if (result.pass) logActivity(`Validated HANA build: ${task.title}`);
-      await saveUserState();
-      showToast(result.pass ? "HANA build marked correct." : "HANA build needs repair.", result.pass ? "success" : "error");
-      renderRoute();
-      return;
-    }
-
-    const checkHanaQa = event.target.closest("[data-check-hana-qa]");
-    if (checkHanaQa) {
-      const item = hanaQaItems.find((entry) => entry.id === checkHanaQa.dataset.checkHanaQa);
-      if (!item) return;
-      const result = evaluateHanaQa(item, userState.hanaQaAnswers[item.id] || "");
-      userState.hanaQaFeedback[item.id] = result;
-      if (result.pass) logActivity(`Answered HANA question: ${item.question}`);
-      await saveUserState();
-      showToast(result.pass ? "Typed answer correct." : "Typed answer needs review.", result.pass ? "success" : "error");
-      renderRoute();
-      return;
-    }
-
-    const qaFilterButton = event.target.closest("[data-qa-filter]");
-    if (qaFilterButton) {
-      qaFilter = qaFilterButton.dataset.qaFilter;
-      renderRoute();
-      return;
-    }
-
-    const qaReveal = event.target.closest("[data-qa-reveal]");
-    if (qaReveal) {
-      const id = qaReveal.dataset.qaReveal;
-      if (userState.qaReviewed[id]) delete userState.qaReviewed[id];
-      else {
-        userState.qaReviewed[id] = true;
-        const item = qaItems.find((entry) => entry.id === id);
-        if (item) logActivity(`Reviewed Q&A: ${item.question}`);
-      }
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const noteFromQa = event.target.closest("[data-note-from-qa]");
-    if (noteFromQa) {
-      const item = qaItems.find((entry) => entry.id === noteFromQa.dataset.noteFromQa);
-      if (item) await createNote({ title: item.question, category: item.category, body: `${item.answer}\n\nMy own explanation:\n` });
-      return;
-    }
-
-    const walkStep = event.target.closest("[data-walk-step]");
-    if (walkStep) {
-      const key = walkStep.dataset.walkStep;
-      userState.walkSteps[key] = !userState.walkSteps[key];
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const resetWalk = event.target.closest("[data-reset-walk]");
-    if (resetWalk) {
-      const id = resetWalk.dataset.resetWalk;
-      Object.keys(userState.walkSteps).filter((key) => key.startsWith(`${id}:`)).forEach((key) => delete userState.walkSteps[key]);
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const noteFromWalk = event.target.closest("[data-note-from-walk]");
-    if (noteFromWalk) {
-      const walkthrough = walkthroughs.find((item) => item.id === noteFromWalk.dataset.noteFromWalk);
-      if (walkthrough) await createNote({ title: `${walkthrough.title} notes`, category: "Cloud Integration", body: `Objective: ${walkthrough.objective}\n\nWhat I need to remember:\n` });
-      return;
-    }
-
-    const landmarkButton = event.target.closest("[data-landmark]");
-    if (landmarkButton) {
-      const id = landmarkButton.dataset.landmark;
-      userState.landmarks[id] = !userState.landmarks[id];
-      if (userState.landmarks[id]) {
-        const item = landmarks.find((entry) => entry.id === id);
-        if (item) logActivity(`Completed landmark: ${item.title}`);
-      }
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const checkItem = event.target.closest("[data-check-item]");
-    if (checkItem) {
-      userState.checklist[checkItem.dataset.checkItem] = checkItem.checked;
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const deleteCheck = event.target.closest("[data-delete-check]");
-    if (deleteCheck) {
-      const id = deleteCheck.dataset.deleteCheck;
-      userState.customChecklist = userState.customChecklist.filter((item) => item.id !== id);
-      delete userState.checklist[id];
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-reset-checklist]")) {
-      confirmDialog("Reset checklist?", "This clears every checklist tick for the current profile. Custom items remain.", async () => {
-        userState.checklist = {};
-        await saveUserState();
-        renderRoute();
-      });
-      return;
-    }
-
-    const noteSelect = event.target.closest("[data-note-select]");
-    if (noteSelect) {
-      selectedNoteId = noteSelect.dataset.noteSelect;
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-new-note]")) {
-      await createNote();
-      return;
-    }
-
-    const deleteNote = event.target.closest("[data-delete-note]");
-    if (deleteNote) {
-      const id = deleteNote.dataset.deleteNote;
-      confirmDialog("Delete note?", "This permanently removes the selected note from this browser profile.", async () => {
-        await dbDelete("notes", id);
-        notes = notes.filter((note) => note.id !== id);
-        selectedNoteId = notes[0]?.id || null;
-        showToast("Note deleted.");
-        renderRoute();
-      });
-      return;
-    }
-
-    if (event.target.closest("[data-export-notes]")) {
-      const payload = {
-        application: APP_NAME,
-        profile: activeProfile.name,
-        exportedAt: new Date().toISOString(),
-        notes
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `sap-spellbook-notes-${activeProfile.id}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
-      showToast("Notes exported.", "success");
-      return;
-    }
-
-    if (event.target.closest("[data-start-mock]")) {
-      userState.mock = {
-        active: true,
-        submitted: false,
-        startedAt: Date.now(),
-        endAt: Date.now() + THREE_HOURS,
-        answers: {},
-        passed: {},
-        current: 0,
-        history: userState.mock.history || []
-      };
-      logActivity("Started the Final Boss Trial");
-      await saveUserState();
-      renderRoute();
-      showToast("Final Boss Trial started. The countdown is active.");
-      return;
-    }
-
-    const mockChallenge = event.target.closest("[data-mock-challenge]");
-    if (mockChallenge) {
-      userState.mock.current = Number(mockChallenge.dataset.mockChallenge);
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const mockSingle = event.target.closest("[data-mock-single]");
-    if (mockSingle) {
-      const challenge = systemChallenges[userState.mock.current || 0];
-      userState.mock.answers[challenge.id] = Number(mockSingle.dataset.mockSingle);
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const mockMulti = event.target.closest("[data-mock-multi]");
-    if (mockMulti) {
-      const challenge = systemChallenges[userState.mock.current || 0];
-      const index = Number(mockMulti.dataset.mockMulti);
-      const answer = Array.isArray(userState.mock.answers[challenge.id]) ? [...userState.mock.answers[challenge.id]] : [];
-      const position = answer.indexOf(index);
-      if (position >= 0) answer.splice(position, 1);
-      else answer.push(index);
-      userState.mock.answers[challenge.id] = answer;
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const mockSeqAdd = event.target.closest("[data-mock-sequence-add]");
-    if (mockSeqAdd) {
-      const challenge = systemChallenges[userState.mock.current || 0];
-      const answer = Array.isArray(userState.mock.answers[challenge.id]) ? [...userState.mock.answers[challenge.id]] : [];
-      answer.push(mockSeqAdd.dataset.mockSequenceAdd);
-      userState.mock.answers[challenge.id] = answer;
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    const mockSeqRemove = event.target.closest("[data-mock-sequence-remove]");
-    if (mockSeqRemove) {
-      const challenge = systemChallenges[userState.mock.current || 0];
-      const answer = Array.isArray(userState.mock.answers[challenge.id]) ? [...userState.mock.answers[challenge.id]] : [];
-      answer.splice(Number(mockSeqRemove.dataset.mockSequenceRemove), 1);
-      userState.mock.answers[challenge.id] = answer;
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-submit-mock]")) {
-      confirmDialog("Submit Final Boss Trial?", "Submission stops the timer and reveals the task-by-task result.", () => submitMock(false));
-      return;
-    }
-
-    if (event.target.closest("[data-restart-mock]")) {
-      userState.mock.active = false;
-      userState.mock.submitted = false;
-      userState.mock.answers = {};
-      userState.mock.passed = {};
-      await saveUserState();
-      renderRoute();
-      return;
-    }
-
-    if (event.target.closest("[data-review-mock]")) {
-      const firstFailed = systemChallenges.findIndex((challenge) => !userState.mock.passed[challenge.id]);
-      currentChallenge = firstFailed >= 0 ? firstFailed : 0;
-      setRoute("simulator");
-      return;
-    }
-
-    if (event.target.closest("#confirmCancel")) {
-      confirmAction = null;
-      document.getElementById("confirmDialog").close();
-      return;
-    }
-
-    if (event.target.closest("#confirmAccept")) {
-      const action = confirmAction;
-      confirmAction = null;
-      document.getElementById("confirmDialog").close();
-      if (action) await action();
     }
   }
 
-  async function handleInput(event) {
-    if (event.target.id === "qaSearch") {
-      qaSearch = event.target.value;
+  function handleChange(event) {
+    const bossTask = event.target.closest("[data-boss-task]");
+    if (bossTask) {
+      const p = progress();
+      p.boss.completed[bossTask.dataset.bossTask] = bossTask.checked;
+      saveState();
       renderRoute();
-      const input = document.getElementById("qaSearch");
-      input.focus();
-      input.setSelectionRange(qaSearch.length, qaSearch.length);
       return;
     }
 
-    if (event.target.id === "noteSearch") {
-      noteSearch = event.target.value;
+    const check = event.target.closest("[data-check]");
+    if (check) {
+      const p = progress();
+      p.checklist[check.dataset.check] = check.checked;
+      p.lastRune = check.checked ? "Moonstone checklist updated" : "Checklist item reopened";
+      saveState();
       renderRoute();
-      const input = document.getElementById("noteSearch");
-      input.focus();
-      input.setSelectionRange(noteSearch.length, noteSearch.length);
-      return;
-    }
-
-    const simField = event.target.dataset.simField;
-    if (simField !== undefined) {
-      const challenge = systemChallenges[currentChallenge];
-      if (!userState.simAnswers[challenge.id] || typeof userState.simAnswers[challenge.id] !== "object" || Array.isArray(userState.simAnswers[challenge.id])) {
-        userState.simAnswers[challenge.id] = {};
-      }
-      userState.simAnswers[challenge.id][simField] = event.target.value;
-      await saveUserState();
-      return;
-    }
-
-    const mockField = event.target.dataset.mockField;
-    if (mockField !== undefined) {
-      const challenge = systemChallenges[userState.mock.current || 0];
-      if (!userState.mock.answers[challenge.id] || typeof userState.mock.answers[challenge.id] !== "object" || Array.isArray(userState.mock.answers[challenge.id])) {
-        userState.mock.answers[challenge.id] = {};
-      }
-      userState.mock.answers[challenge.id][mockField] = event.target.value;
-      await saveUserState();
-      return;
-    }
-
-    const hanaAnswer = event.target.dataset.hanaAnswer;
-    if (hanaAnswer !== undefined) {
-      userState.hanaAnswers[hanaAnswer] = event.target.value;
-      await saveUserState();
-      return;
-    }
-
-    const hanaQa = event.target.dataset.hanaQa;
-    if (hanaQa !== undefined) {
-      userState.hanaQaAnswers[hanaQa] = event.target.value;
-      await saveUserState();
     }
   }
 
-  async function handleSubmit(event) {
-    if (event.target.id === "profileCreateForm") {
-      event.preventDefault();
-      const name = document.getElementById("newProfileName").value.trim();
-      const pin = document.getElementById("newProfilePin").value.trim();
-      if (!name) return;
-      if (pin && !/^\d{4,8}$/.test(pin)) {
-        showToast("A profile PIN must contain 4–8 digits.", "error");
-        return;
-      }
-      const profile = {
-        id: crypto.randomUUID(),
-        name,
-        initials: initials(name),
-        pinHash: await hashPin(pin),
-        createdAt: Date.now(),
-        lastLogin: Date.now()
-      };
-      await dbPut("profiles", profile);
-      document.getElementById("profileDialog").close();
-      event.target.reset();
-      await loadProfile(profile);
-      showToast(`Created ${name}'s workspace.`, "success");
-      return;
-    }
-
-    if (event.target.id === "pinForm") {
-      event.preventDefault();
-      const id = document.getElementById("pinProfileId").value;
-      const profile = await dbGet("profiles", id);
-      const entered = await hashPin(document.getElementById("profilePin").value);
-      if (!profile || entered !== profile.pinHash) {
-        document.getElementById("pinError").textContent = "That PIN does not match this device profile.";
-        return;
-      }
-      document.getElementById("pinDialog").close();
-      event.target.reset();
-      await loadProfile(profile);
-      showToast(`Opened ${profile.name}'s workspace.`, "success");
-      return;
-    }
-
-    if (event.target.id === "customCheckForm") {
-      event.preventDefault();
-      const group = document.getElementById("customCheckGroup").value.trim();
-      const text = document.getElementById("customCheckText").value.trim();
-      if (!group || !text) return;
-      userState.customChecklist.push({ id: `custom-${crypto.randomUUID()}`, group, text, custom: true });
-      await saveUserState();
-      showToast("Potion checklist item added.", "success");
-      renderRoute();
-      return;
-    }
-
-    if (event.target.id === "noteForm") {
-      event.preventDefault();
-      const id = document.getElementById("noteId").value;
-      const note = notes.find((item) => item.id === id);
-      if (!note) return;
-      note.title = document.getElementById("noteTitle").value.trim() || "Untitled note";
-      note.category = document.getElementById("noteCategory").value;
-      note.body = document.getElementById("noteBody").value;
-      note.updatedAt = Date.now();
-      await dbPut("notes", note);
-      notes.sort((a, b) => b.updatedAt - a.updatedAt);
-      logActivity(`Updated note: ${note.title}`);
-      await saveUserState();
-      showToast("Note saved.", "success");
-      renderRoute();
-    }
+  function hydrateIcons() {
+    document.querySelectorAll("[data-icon]").forEach((node) => {
+      node.innerHTML = icon(node.dataset.icon);
+    });
   }
 
   function registerServiceWorker() {
     if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
-
-    const hadController = Boolean(navigator.serviceWorker.controller);
-    let reloading = false;
-
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (!hadController || reloading) return;
-      reloading = true;
-      window.location.reload();
-    });
-
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .then((registration) => registration.update())
-      .catch(() => {});
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
   }
 
-  async function initialize() {
-    document.querySelectorAll("[data-icon]").forEach((node) => {
-      node.innerHTML = icon(node.dataset.icon);
-    });
-    applyTheme(localStorage.getItem(THEME_KEY) || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
-    db = await openDatabase();
-    const guest = await ensureGuestProfile();
-    const activeId = localStorage.getItem(ACTIVE_PROFILE_KEY);
-    const profile = activeId ? await dbGet("profiles", activeId) : guest;
-    await loadProfile(profile || guest);
+  function init() {
+    progress(activeStreamId);
+    document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY) || "dark";
+    document.getElementById("themeButton").innerHTML = `<span data-icon="${document.documentElement.dataset.theme === "dark" ? "moon" : "sun"}"></span>`;
+    activeSection = location.hash.replace("#", "") || "dashboard";
+    document.addEventListener("click", handleClick);
+    document.addEventListener("change", handleChange);
+    window.addEventListener("hashchange", renderRoute);
+    renderRoute();
+    hydrateIcons();
+    registerServiceWorker();
     document.getElementById("bootScreen").hidden = true;
     document.getElementById("appShell").hidden = false;
-    document.addEventListener("click", handleClick);
-    document.addEventListener("input", handleInput);
-    document.addEventListener("change", handleInput);
-    document.addEventListener("submit", handleSubmit);
-    window.addEventListener("hashchange", renderRoute);
-    registerServiceWorker();
   }
 
-  initialize().catch((error) => {
-    console.error(error);
-    document.getElementById("bootScreen").innerHTML = `<strong>Workspace could not start</strong><span>${esc(error.message || "IndexedDB is unavailable in this browser.")}</span>`;
-  });
+  init();
 })();
