@@ -4,10 +4,13 @@
   const STORAGE_KEY = "sap-spellbook-academy-v2";
   const STREAM_KEY = "sap-spellbook-active-stream-v2";
   const THEME_KEY = "sap-spellbook-theme-v2";
+  const STUDENT_DB_KEY = "sap-spellbook-student-database-v1";
+  const STUDENT_SESSION_KEY = "sap-spellbook-student-session-v1";
   const BOSS_SECONDS = 3 * 60 * 60;
 
   const sections = [
     ["dashboard", "Spell Desk", "dashboard"],
+    ["students", "Student Portal", "user"],
     ["grimoire", "Practice Grimoire", "book"],
     ["roadmap", "Quest Map", "map"],
     ["library", "Arcane Library", "library"],
@@ -28,6 +31,7 @@
     wand: '<svg viewBox="0 0 24 24" fill="none"><path d="m4 20 10-10m-1-5 1-2 1 2 2 1-2 1-1 2-1-2-2-1zm6 7 1-2 1 2 2 1-2 1-1 2-1-2-2-1z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     timer: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke-width="1.8"/><path d="M9 3h6m-3 4v6l4 2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none"><path d="m5 12 4 4L19 6M4 20h16" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.8" stroke-linecap="round"/></svg>',
     moon: '<svg viewBox="0 0 24 24" fill="none"><path d="M20 15.3A8 8 0 0 1 8.7 4a8 8 0 1 0 11.3 11.3Z" stroke-width="1.8" stroke-linejoin="round"/></svg>',
     sun: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke-width="1.8"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-width="1.8" stroke-linecap="round"/></svg>',
@@ -149,6 +153,78 @@
         ["Which two API policies match authentication plus burst protection?", ["Assign Message and XML Threat Protection", "Verify API Key and Spike Arrest", "OAuth Bearer and Content Modifier", "CORS and Message Mapping"], 1, "Verify API Key checks consumers; Spike Arrest controls bursts."],
         ["A log warns that ORDER_API was not found, then the receiver returns 401. What should you fix first?", ["The message mapping", "The receiver credential alias", "The Event Mesh queue", "The API product"], 1, "The earliest warning points to missing security material."],
         ["Clean-core integration usually prefers which pattern?", ["Modify unreleased ERP tables directly", "Use released APIs or business events", "Copy database tables nightly without contracts", "Disable governance for speed"], 1, "Released contracts reduce upgrade friction."]
+      ],
+      systemExams: [
+        {
+          title: "Integration Flow Build Exam",
+          duration: "45 min",
+          mission: "Build a fictional order intake flow from an inbound webhook to a protected fulfillment endpoint.",
+          source: "Stream 1 Integration Developer practice content; SAP Integration Suite learning journey",
+          env: {
+            name: "Academy Integration Console",
+            notice: "Original study UI. It resembles a generic enterprise console only; it does not copy SAP screens, icons, product layout, or proprietary exam tasks.",
+            nav: ["Mission Desk", "Flow Workshop", "Mapping Atelier", "Security Vault", "Run Monitor"]
+          },
+          tasks: [
+            "Create package ACADEMY_ORDERS with one integration flow named Order Intake Trial.",
+            "Add an HTTPS sender, JSON to XML conversion, mapping step, Request Reply, and HTTP receiver.",
+            "Externalize the receiver host and bind credential alias ORDER_API_DEV.",
+            "Run one test message and capture the monitor proof."
+          ],
+          codeBlocks: [
+            ["Flow Blueprint", "text", "HTTPS Sender -> Content Modifier -> JSON to XML Converter -> Message Mapping -> Request Reply -> HTTP Receiver"],
+            ["Externalized Parameters", "properties", "ReceiverHost=https://dev.fulfillment.example\nReceiverPath=/orders\nCredentialAlias=ORDER_API_DEV"],
+            ["Sample Payload", "json", "{\n  \"orderId\": \"A-1007\",\n  \"customerId\": \"C-204\",\n  \"netAmount\": 149.90,\n  \"currency\": \"EUR\"\n}"]
+          ],
+          validation: ["Flow deploys without missing configuration.", "The receiver URL is composed from externalized values.", "Monitor proof shows one completed test exchange.", "The credential alias is referenced, not hard-coded."],
+          skeleton: "Package: ______\nSender path: ______\nReceiver host parameter: ______\nCredential alias: ______\nMonitor proof: ______"
+        },
+        {
+          title: "API Shield Exam",
+          duration: "35 min",
+          mission: "Expose a fictional Orders API and protect it with consumer identity and burst control.",
+          source: "Stream 1 API Management practice content; SAP Integration Suite learning journey",
+          env: {
+            name: "Academy API Gate",
+            notice: "The panels, names, and routes are original to this site and are intentionally not screenshots or replicas of SAP software.",
+            nav: ["Provider Shelf", "Proxy Forge", "Policy Loom", "Product Cabinet", "Test Lantern"]
+          },
+          tasks: [
+            "Create provider FULFILLMENT_DEV and proxy /academy/orders/v1.",
+            "Attach Verify Key before the target request leaves the proxy.",
+            "Attach Spike Guard with a 15 requests per minute practice limit.",
+            "Publish the proxy through product ACADEMY_ORDER_PRODUCT."
+          ],
+          codeBlocks: [
+            ["Policy Order", "yaml", "requestPreFlow:\n  - Verify-Key\n  - Spike-Guard\nresponsePostFlow:\n  - Add-Correlation-Header"],
+            ["Proxy Route", "json", "{\n  \"basePath\": \"/academy/orders/v1\",\n  \"target\": \"https://dev.fulfillment.example/orders\",\n  \"product\": \"ACADEMY_ORDER_PRODUCT\"\n}"]
+          ],
+          validation: ["Missing key request is rejected.", "Approved key request reaches the target.", "Burst limit is documented in the policy note.", "Product and proxy names match the task."],
+          skeleton: "Provider: ______\nBase path: ______\nPolicies: ______\nProduct: ______\nNegative test result: ______"
+        },
+        {
+          title: "Event Channel Exam",
+          duration: "30 min",
+          mission: "Route a sales-order event into a durable fictional queue and prove the consumer can receive it.",
+          source: "Stream 1 Event Mesh practice content; SAP Integration Suite learning journey",
+          env: {
+            name: "Academy Event Channel",
+            notice: "This is a safe teaching model with invented labels and no copied vendor UI.",
+            nav: ["Topic Compass", "Queue Forge", "Subscription Loom", "Message Ledger", "Consumer Test"]
+          },
+          tasks: [
+            "Create queue academy.orders.created.q.",
+            "Use shared consumer access for the practice queue.",
+            "Subscribe to academy/sales/order/created/v1.",
+            "Publish a sample event and prove the queue received it."
+          ],
+          codeBlocks: [
+            ["Queue Settings", "yaml", "queue: academy.orders.created.q\naccess: shared\nmaxRedelivery: 3\nretention: practice-default"],
+            ["Event Envelope", "json", "{\n  \"type\": \"academy.sales.order.created.v1\",\n  \"source\": \"academy/sales\",\n  \"data\": {\n    \"orderId\": \"A-1007\",\n    \"status\": \"CREATED\"\n  }\n}"]
+          ],
+          validation: ["Topic subscription matches exactly.", "Queue receives the sample event.", "Consumer acknowledgement is recorded.", "Redelivery setting is explained."],
+          skeleton: "Queue: ______\nTopic: ______\nAccess model: ______\nMessage proof: ______"
+        }
       ],
       checklist: [
         ["Readiness", "I can explain the certification scope from the official SAP page."],
@@ -355,6 +431,77 @@
         ["What is hdblcm used for?", ["SAP HANA lifecycle installation and component operations", "API traffic limiting", "Event routing", "Only SQL query tuning"], 0, "hdblcm is the SAP HANA lifecycle management tool."],
         ["What is a safe first action after an admin task fails?", ["Change several settings at once", "Collect symptom, time, system, logs, alerts, SQL, recent changes, and impact", "Delete the tenant", "Disable auditing"], 1, "Good troubleshooting starts with evidence."]
       ],
+      systemExams: [
+        {
+          title: "HANA Cloud Operations Exam",
+          duration: "55 min",
+          mission: "Operate a fictional HANA Cloud practice instance, create catalog evidence, and verify backup readiness.",
+          source: "Uploaded HANA Cloud Study Notes; SAP HANA Cloud administration guide",
+          env: {
+            name: "Academy Cloud Console",
+            notice: "Original educational interface. It uses invented navigation labels and abstract panels so it is safe to publish and not a SAP UI clone.",
+            nav: ["Cloud Gate", "Instance Hall", "Data Console", "Monitor Tower", "Recovery Room"]
+          },
+          tasks: [
+            "Confirm the practice instance ACADEMYDB is running.",
+            "Create schema HC_ACADEMY and table RUNES_AUDIT.",
+            "Insert two evidence rows and verify the row count.",
+            "Write the backup and recovery evidence you would collect before an incident response."
+          ],
+          codeBlocks: [
+            ["Catalog Runes", "sql", "CREATE SCHEMA \"HC_ACADEMY\";\n\nCREATE COLUMN TABLE \"HC_ACADEMY\".\"RUNES_AUDIT\" (\n  \"RUNE_ID\" INTEGER,\n  \"RUNE_NAME\" NVARCHAR(80),\n  \"STATUS\" NVARCHAR(20)\n);\n\nINSERT INTO \"HC_ACADEMY\".\"RUNES_AUDIT\" VALUES (1, 'Backup Evidence', 'READY');\nINSERT INTO \"HC_ACADEMY\".\"RUNES_AUDIT\" VALUES (2, 'Recovery Target', 'READY');"],
+            ["Verification SQL", "sql", "SELECT COUNT(*) AS ROWS_READY\nFROM \"HC_ACADEMY\".\"RUNES_AUDIT\";\n\nSELECT SCHEMA_NAME, TABLE_NAME\nFROM SYS.TABLES\nWHERE SCHEMA_NAME = 'HC_ACADEMY';"]
+          ],
+          validation: ["Instance status is recorded.", "Schema and column table names match exactly.", "Two rows are visible.", "Backup evidence includes data backup, log backup, retention, and recovery target."],
+          skeleton: "Instance: ______\nSchema: ______\nTable: ______\nRow count: ______\nBackup evidence: ______"
+        },
+        {
+          title: "Self-Service Migration Exam",
+          duration: "60 min",
+          mission: "Prepare a fictional migration project from an on-premises source to HANA Cloud and handle compatibility findings.",
+          source: "Uploaded Self-Service Migration for SAP HANA Cloud",
+          env: {
+            name: "Academy Migration Portal",
+            notice: "The layout is a fictional training portal, not a copy of SAP HANA Cloud Central or any proprietary migration wizard.",
+            nav: ["Project Desk", "Source Bridge", "Target Crystal", "Compatibility Lens", "Cutover Ledger"]
+          },
+          tasks: [
+            "Collect virtual host, port, location ID, migration user, and target database credentials.",
+            "Run the compatibility check and classify Critical, Error, Warning, and Info findings.",
+            "Write the validation checklist for catalog, data, secure store, and application connectivity.",
+            "Create the alert notification routing plan for migration progress and completion."
+          ],
+          codeBlocks: [
+            ["Migration Inputs", "yaml", "project: academy-onprem-to-cloud\nsourceType: hana-on-premises\nvirtualHost: hana-academy.internal\nvirtualPort: 39015\nlocationId: academy-cc-01\nmigrationUser: MIGRATION_ACADEMY\ntarget: ACADEMYDB"],
+            ["Severity Response", "text", "Critical -> resolve before continuing\nError -> object will not migrate; plan remediation\nWarning -> review behavior change and accept or fix\nInfo -> document for awareness"]
+          ],
+          validation: ["Connectivity fields are complete.", "Critical findings are not ignored.", "Validation includes object counts, row counts, auth checks, and app smoke tests.", "Notification plan has condition, action, and subscription."],
+          skeleton: "Virtual host: ______\nLocation ID: ______\nMigration user: ______\nBlocking findings: ______\nValidation checks: ______"
+        },
+        {
+          title: "Security and Audit Exam",
+          duration: "45 min",
+          mission: "Create a least-privilege model in a fictional HANA tenant and prove auditing is enabled for connection activity.",
+          source: "Uploaded HANA Cloud Study Notes Module 10; uploaded Installation and Administration lessons",
+          env: {
+            name: "Academy Security Vault",
+            notice: "This environment is a custom study simulator with original names and visual structure.",
+            nav: ["User Foundry", "Role Loom", "Audit Mirror", "Privilege Ledger", "Proof Console"]
+          },
+          tasks: [
+            "Create a restricted reporting user for view-only access.",
+            "Grant access through a role rather than direct privilege sprawl.",
+            "Create and enable an audit policy for connection events.",
+            "Explain why user groups do not grant object access."
+          ],
+          codeBlocks: [
+            ["Least-Privilege SQL", "sql", "CREATE RESTRICTED USER REPORT_RUNE PASSWORD \"PracticeOnly1\" NO FORCE_FIRST_PASSWORD_CHANGE;\n\nCREATE ROLE REPORT_RUNE_ROLE;\nGRANT SELECT ON \"HC_ACADEMY\".\"RUNES_AUDIT\" TO REPORT_RUNE_ROLE;\nGRANT REPORT_RUNE_ROLE TO REPORT_RUNE;"],
+            ["Audit Policy SQL", "sql", "CREATE AUDIT POLICY \"ACADEMY_CONNECT_AUDIT\"\nAUDITING SUCCESSFUL CONNECT, UNSUCCESSFUL CONNECT\nUSER REPORT_RUNE\nLEVEL INFO;\n\nALTER AUDIT POLICY \"ACADEMY_CONNECT_AUDIT\" ENABLE;"]
+          ],
+          validation: ["REPORT_RUNE is restricted.", "SELECT is granted through a role.", "Audit policy includes successful and unsuccessful connects.", "User group purpose is described separately from data privileges."],
+          skeleton: "User type: ______\nRole: ______\nObject privilege: ______\nAudit policy: ______\nUser group explanation: ______"
+        }
+      ],
       checklist: [
         ["Readiness", "I can complete the task without looking."],
         ["Readiness", "I can explain every code block line by line."],
@@ -379,6 +526,8 @@
   let activeSection = "dashboard";
   let simulatorIndex = 0;
   let bossTicker = null;
+  let studentDb = loadStudentDb();
+  let activeStudentId = localStorage.getItem(STUDENT_SESSION_KEY) || "";
 
   const page = document.getElementById("page");
   const primaryNav = document.getElementById("primaryNav");
@@ -400,6 +549,29 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
+  function loadStudentDb() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STUDENT_DB_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveStudentDb() {
+    localStorage.setItem(STUDENT_DB_KEY, JSON.stringify(studentDb));
+  }
+
+  function activeStudent() {
+    return studentDb.find((student) => student.id === activeStudentId) || null;
+  }
+
+  async function hashText(value) {
+    const input = new TextEncoder().encode(`sap-spellbook-academy:${value}`);
+    const digest = await crypto.subtle.digest("SHA-256", input);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+
   function stream() {
     return streams[activeStreamId] || streams.stream1;
   }
@@ -410,6 +582,8 @@
       labs: {},
       checklist: {},
       simulator: {},
+      systemExams: {},
+      envPanels: {},
       boss: { active: false, endAt: 0, completed: {}, history: [] },
       lastRune: ""
     };
@@ -418,6 +592,8 @@
     state[streamId].labs ||= {};
     state[streamId].checklist ||= {};
     state[streamId].simulator ||= {};
+    state[streamId].systemExams ||= {};
+    state[streamId].envPanels ||= {};
     return state[streamId];
   }
 
@@ -453,12 +629,13 @@
     const labsDone = Object.values(p.labs).filter(Boolean).length;
     const checklistDone = Object.values(p.checklist).filter(Boolean).length;
     const simDone = Object.values(p.simulator).filter((item) => item?.correct).length;
+    const examDone = Object.values(p.systemExams || {}).filter(Boolean).length;
     const quest = pct(questReady, s.questMap.length);
     const labs = pct(labsDone, s.tasks.length);
     const checklist = pct(checklistDone, s.checklist.length);
-    const sim = pct(simDone, s.simulator.length);
+    const sim = pct(simDone + examDone, s.simulator.length + s.systemExams.length);
     const readiness = Math.round(quest * 0.28 + labs * 0.30 + sim * 0.24 + checklist * 0.18);
-    return { quest, labs, checklist, sim, readiness, questReady, labsDone, checklistDone, simDone };
+    return { quest, labs, checklist, sim, readiness, questReady, labsDone, checklistDone, simDone, examDone };
   }
 
   function renderNav() {
@@ -475,10 +652,12 @@
 
   function renderStreamMini() {
     const s = stream();
+    const student = activeStudent();
     document.getElementById("streamMini").innerHTML = `
       <span class="mini-label">Current stream</span>
       <strong>${esc(s.shortLabel)}</strong>
       <small>${esc(s.certification)}</small>
+      ${student ? `<small>Student: ${esc(student.name)}</small>` : '<small>No student signed in</small>'}
       <button class="text-link" data-route="dashboard" type="button">Change stream</button>
     `;
   }
@@ -503,6 +682,7 @@
 
     const renderers = {
       dashboard: renderDashboard,
+      students: renderStudents,
       grimoire: renderGrimoire,
       roadmap: renderRoadmap,
       library: renderLibrary,
@@ -586,6 +766,79 @@
         </article>
       </section>
       ${sourceStrip()}
+    `;
+  }
+
+  function renderStudents() {
+    const student = activeStudent();
+    const studentRows = studentDb.length ? studentDb.map((record) => `
+      <div class="student-row ${record.id === activeStudentId ? "active" : ""}">
+        <div>
+          <strong>${esc(record.name)}</strong>
+          <span>${esc(record.email)}</span>
+        </div>
+        <span>${esc(streams[record.stream]?.shortLabel || "No stream")}</span>
+        <time>${record.lastLogin ? new Date(record.lastLogin).toLocaleDateString() : "Never"}</time>
+      </div>
+    `).join("") : '<div class="empty-state"><h3>No student records yet</h3><p>Create the first account to start the local student database.</p></div>';
+
+    return `
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Student database</p>
+          <h2>Student Portal</h2>
+          <p>Create a student account, log in, and keep stream progress tied to a local learner profile. This is a browser-local database for GitHub Pages, not a cloud identity service.</p>
+        </div>
+        <span class="tag">${studentDb.length} local account${studentDb.length === 1 ? "" : "s"}</span>
+      </div>
+
+      ${student ? `
+        <section class="student-hero panel">
+          <div>
+            <p class="eyebrow">Signed in</p>
+            <h3>${esc(student.name)}</h3>
+            <p>${esc(student.email)} has ${esc(streams[student.stream]?.label || stream().label)} saved as the preferred stream.</p>
+          </div>
+          <div class="student-actions">
+            <button class="button button-secondary" data-route="dashboard" type="button">Open dashboard</button>
+            <button class="button button-warning" data-student-logout type="button">Log out</button>
+          </div>
+        </section>
+      ` : ""}
+
+      <section class="student-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div><p class="eyebrow">Create account</p><h3>New student</h3><p>Stored only on this device in browser storage.</p></div>
+          </div>
+          <form class="student-form" id="studentCreateForm">
+            <label><span>Student name</span><input id="studentCreateName" maxlength="50" required placeholder="Learner name"></label>
+            <label><span>Email or student ID</span><input id="studentCreateEmail" maxlength="80" required placeholder="student@example.com"></label>
+            <label><span>Passcode</span><input id="studentCreatePasscode" type="password" minlength="4" maxlength="40" required placeholder="At least 4 characters"></label>
+            <label><span>Certification stream</span><select id="studentCreateStream">${Object.entries(streams).map(([id, item]) => `<option value="${id}" ${id === activeStreamId ? "selected" : ""}>${esc(item.label)} - ${esc(item.certification)}</option>`).join("")}</select></label>
+            <button class="button button-primary" type="submit">Create account and log in</button>
+          </form>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div><p class="eyebrow">Log in</p><h3>Returning student</h3><p>Use the same browser and passcode used when creating the account.</p></div>
+          </div>
+          <form class="student-form" id="studentLoginForm">
+            <label><span>Email or student ID</span><input id="studentLoginEmail" maxlength="80" required placeholder="student@example.com"></label>
+            <label><span>Passcode</span><input id="studentLoginPasscode" type="password" minlength="4" maxlength="40" required></label>
+            <button class="button button-secondary" type="submit">Log in</button>
+          </form>
+          <div class="hint-box">For a public static site, this protects only this browser profile. Do not use a real school password.</div>
+        </article>
+
+        <article class="panel student-database">
+          <div class="panel-head">
+            <div><p class="eyebrow">Local records</p><h3>Student database</h3><p>Passcodes are stored as hashes and are never displayed.</p></div>
+          </div>
+          <div class="student-table">${studentRows}</div>
+        </article>
+      </section>
     `;
   }
 
@@ -787,26 +1040,45 @@
     const scenario = s.simulator[simulatorIndex % s.simulator.length];
     const saved = p.simulator[scenario[0]];
     const answered = saved && typeof saved.choice === "number";
+    const completedExams = Object.values(p.systemExams || {}).filter(Boolean).length;
     return `
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Random practice mode</p>
+          <p class="eyebrow">System-based practice mode</p>
           <h2>Spell Simulator</h2>
-          <p>Answer using the grimoire structure: tool, route, steps, code, explanation, expected result, and verification.</p>
+          <p>Practice in an embedded Academy Console with original navigation, safe fictional screens, code runes, answer skeletons, and validation checks.</p>
         </div>
         <div class="heading-actions">
           <button class="button button-secondary" data-sim-random type="button">Random Spell</button>
           <button class="button button-primary" data-sim-next type="button">Next Spell</button>
         </div>
       </div>
-      <section class="simulator-card">
+
+      <section class="system-exam-overview">
+        <article class="panel">
+          <p class="eyebrow">Practice exams</p>
+          <h3>${completedExams}/${s.systemExams.length} system exams completed</h3>
+          <p>Each practice exam uses made-up data, neutral interface labels, and generic enterprise-console patterns so the site can be published safely.</p>
+        </article>
+        <article class="panel">
+          <p class="eyebrow">Copyright-safe environment</p>
+          <h3>Original Academy Console</h3>
+          <p>The virtual environment is not a SAP screenshot, clone, or exam replica. It teaches workflow logic with fictional names and original layout.</p>
+        </article>
+      </section>
+
+      <section class="system-exam-grid">
+        ${s.systemExams.map((exam, index) => systemExamCard(exam, index)).join("")}
+      </section>
+
+      <section class="simulator-card quick-drill">
         <div class="mode-row">
           <span>Apprentice Mode: hints on</span>
           <span>Mage Mode: limited hints</span>
           <span>Final Boss Mode: no hints</span>
           <span>Rune Mode: explain the answer</span>
         </div>
-        <p class="eyebrow">Scenario ${simulatorIndex + 1} of ${s.simulator.length}</p>
+        <p class="eyebrow">Quick drill ${simulatorIndex + 1} of ${s.simulator.length}</p>
         <h3>${esc(scenario[0])}</h3>
         <div class="choice-grid">
           ${scenario[1].map((choice, index) => `
@@ -822,6 +1094,97 @@
           </div>
         ` : '<div class="hint-box">Choose an answer, then translate the reasoning in your own words before moving on.</div>'}
       </section>
+    `;
+  }
+
+  function systemExamCard(exam, index) {
+    const p = progress();
+    const complete = Boolean(p.systemExams?.[index]);
+    return `
+      <article class="system-exam-card ${complete ? "complete" : ""}">
+        <div class="exam-head">
+          <div>
+            <p class="eyebrow">System practice exam ${index + 1}</p>
+            <h3>${esc(exam.title)}</h3>
+            <p>${esc(exam.mission)}</p>
+          </div>
+          <span class="tag ${complete ? "green" : ""}">${complete ? "Completed" : exam.duration}</span>
+        </div>
+        ${virtualConsole(exam, index)}
+        <div class="exam-workbench">
+          <div class="scroll-block">
+            <strong>Task List</strong>
+            <ol>${exam.tasks.map((task) => `<li>${esc(task)}</li>`).join("")}</ol>
+          </div>
+          <div class="scroll-block">
+            <strong>Validation Checks</strong>
+            <ul>${exam.validation.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+          </div>
+          <div class="scroll-block">
+            <strong>Blank Spell Scroll</strong>
+            <pre>${esc(exam.skeleton)}</pre>
+          </div>
+          <div class="scroll-block">
+            <strong>Source Scroll</strong>
+            <p>${esc(exam.source)}</p>
+          </div>
+        </div>
+        <div class="code-rune-grid">
+          ${exam.codeBlocks.map(([label, language, code]) => codeRune(label, language, code)).join("")}
+        </div>
+        <label class="check-row exam-check ${complete ? "checked" : ""}">
+          <input type="checkbox" data-system-exam="${index}" ${complete ? "checked" : ""}>
+          <span>I completed this system-based practice exam and verified the expected result.</span>
+        </label>
+      </article>
+    `;
+  }
+
+  function virtualConsole(exam, examIndex) {
+    const p = progress();
+    const activePanel = Math.min(Number(p.envPanels?.[examIndex] || 0), exam.env.nav.length - 1);
+    const activeName = exam.env.nav[activePanel];
+    const activeTask = exam.tasks[activePanel % exam.tasks.length];
+    const activeValidation = exam.validation[activePanel % exam.validation.length];
+    return `
+      <div class="virtual-env">
+        <aside class="virtual-rail" aria-label="${esc(exam.env.name)} navigation">
+          <strong>${esc(exam.env.name)}</strong>
+          ${exam.env.nav.map((item, navIndex) => `
+            <button class="virtual-nav-button ${navIndex === activePanel ? "active" : ""}" data-env-panel="${examIndex}:${navIndex}" type="button">${esc(item)}</button>
+          `).join("")}
+        </aside>
+        <section class="virtual-screen">
+          <div class="virtual-topbar">
+            <span class="status-light"></span>
+            <strong>${esc(activeName)}</strong>
+            <span>Practice sandbox</span>
+          </div>
+          <div class="virtual-grid">
+            <div class="virtual-tile wide">
+              <span>Current objective</span>
+              <strong>${esc(activeTask)}</strong>
+            </div>
+            <div class="virtual-tile">
+              <span>Safe design note</span>
+              <p>${esc(exam.env.notice)}</p>
+            </div>
+            <div class="virtual-tile">
+              <span>Expected proof</span>
+              <p>${esc(activeValidation)}</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
+  function codeRune(label, language, code) {
+    return `
+      <figure class="code-rune">
+        <figcaption><span>${esc(label)}</span><b>${esc(language)}</b></figcaption>
+        <pre><code>${esc(code)}</code></pre>
+      </figure>
     `;
   }
 
@@ -952,6 +1315,11 @@
     if (!streams[id]) return;
     activeStreamId = id;
     localStorage.setItem(STREAM_KEY, id);
+    const student = activeStudent();
+    if (student) {
+      student.stream = id;
+      saveStudentDb();
+    }
     simulatorIndex = 0;
     progress(id);
     saveState();
@@ -1032,6 +1400,16 @@
       return;
     }
 
+    const envPanel = event.target.closest("[data-env-panel]");
+    if (envPanel) {
+      const [examIndex, panelIndex] = envPanel.dataset.envPanel.split(":").map(Number);
+      const p = progress();
+      p.envPanels[examIndex] = panelIndex;
+      saveState();
+      renderRoute();
+      return;
+    }
+
     if (event.target.closest("[data-sim-next]")) {
       simulatorIndex = (simulatorIndex + 1) % stream().simulator.length;
       renderRoute();
@@ -1063,6 +1441,14 @@
       saveState();
       renderRoute();
       showToast("Trial submitted. Repair list ready.", "success");
+      return;
+    }
+
+    if (event.target.closest("[data-student-logout]")) {
+      activeStudentId = "";
+      localStorage.removeItem(STUDENT_SESSION_KEY);
+      renderRoute();
+      showToast("Student logged out.", "success");
       return;
     }
 
@@ -1106,6 +1492,75 @@
       saveState();
       renderRoute();
     }
+
+    const systemExam = event.target.closest("[data-system-exam]");
+    if (systemExam) {
+      const p = progress();
+      const index = systemExam.dataset.systemExam;
+      p.systemExams[index] = systemExam.checked;
+      p.lastRune = `${stream().systemExams[index].title} ${systemExam.checked ? "completed" : "reopened"}`;
+      saveState();
+      renderRoute();
+    }
+  }
+
+  async function handleSubmit(event) {
+    if (event.target.id === "studentCreateForm") {
+      event.preventDefault();
+      const name = document.getElementById("studentCreateName").value.trim();
+      const email = document.getElementById("studentCreateEmail").value.trim().toLowerCase();
+      const passcode = document.getElementById("studentCreatePasscode").value;
+      const preferredStream = document.getElementById("studentCreateStream").value;
+      if (!name || !email || passcode.length < 4) {
+        showToast("Add a name, ID, and passcode of at least 4 characters.", "error");
+        return;
+      }
+      if (studentDb.some((student) => student.email.toLowerCase() === email)) {
+        showToast("That student ID already exists in this browser.", "error");
+        return;
+      }
+      const now = Date.now();
+      const student = {
+        id: crypto.randomUUID ? crypto.randomUUID() : `student-${now}`,
+        name,
+        email,
+        stream: streams[preferredStream] ? preferredStream : activeStreamId,
+        passHash: await hashText(passcode),
+        createdAt: now,
+        lastLogin: now
+      };
+      studentDb.push(student);
+      saveStudentDb();
+      activeStudentId = student.id;
+      localStorage.setItem(STUDENT_SESSION_KEY, student.id);
+      activeStreamId = student.stream;
+      localStorage.setItem(STREAM_KEY, activeStreamId);
+      progress(activeStreamId);
+      saveState();
+      renderRoute();
+      showToast("Student account created and logged in.", "success");
+      return;
+    }
+
+    if (event.target.id === "studentLoginForm") {
+      event.preventDefault();
+      const email = document.getElementById("studentLoginEmail").value.trim().toLowerCase();
+      const passcode = document.getElementById("studentLoginPasscode").value;
+      const student = studentDb.find((record) => record.email.toLowerCase() === email);
+      if (!student || student.passHash !== await hashText(passcode)) {
+        showToast("Login failed. Check the student ID and passcode.", "error");
+        return;
+      }
+      student.lastLogin = Date.now();
+      saveStudentDb();
+      activeStudentId = student.id;
+      localStorage.setItem(STUDENT_SESSION_KEY, student.id);
+      activeStreamId = streams[student.stream] ? student.stream : activeStreamId;
+      localStorage.setItem(STREAM_KEY, activeStreamId);
+      progress(activeStreamId);
+      renderRoute();
+      showToast("Student logged in.", "success");
+    }
   }
 
   function hydrateIcons() {
@@ -1126,6 +1581,7 @@
     activeSection = location.hash.replace("#", "") || "dashboard";
     document.addEventListener("click", handleClick);
     document.addEventListener("change", handleChange);
+    document.addEventListener("submit", handleSubmit);
     window.addEventListener("hashchange", renderRoute);
     renderRoute();
     hydrateIcons();

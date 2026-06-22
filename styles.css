@@ -430,9 +430,12 @@ html[data-theme="light"] .topbar {
 .library-card,
 .lab-card,
 .charm-card,
+.system-exam-card,
 .simulator-card,
 .task-scroll,
-.scroll-block {
+.scroll-block,
+.virtual-screen,
+.student-grid > * {
   min-width: 0;
 }
 
@@ -499,7 +502,10 @@ html[data-theme="light"] .topbar {
 .library-grid,
 .lab-grid,
 .charm-list,
-.checklist-layout {
+.checklist-layout,
+.system-exam-overview,
+.system-exam-grid,
+.student-grid {
   display: grid;
   gap: 16px;
   margin-top: 18px;
@@ -517,6 +523,15 @@ html[data-theme="light"] .topbar {
   grid-template-columns: minmax(0, 1.5fr) minmax(320px, .9fr);
 }
 
+.system-exam-overview {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.system-exam-grid,
+.student-grid {
+  grid-template-columns: 1fr;
+}
+
 .quest-grid,
 .library-grid,
 .lab-grid,
@@ -532,6 +547,7 @@ html[data-theme="light"] .topbar {
 .library-card,
 .lab-card,
 .charm-card,
+.system-exam-card,
 .task-scroll,
 .simulator-card,
 .boss-welcome,
@@ -550,6 +566,7 @@ html[data-theme="light"] .topbar {
 .library-card,
 .lab-card,
 .charm-card,
+.system-exam-card,
 .simulator-card,
 .boss-panel,
 .source-strip {
@@ -893,6 +910,251 @@ pre {
   text-transform: uppercase;
 }
 
+.system-exam-card {
+  display: grid;
+  gap: 16px;
+}
+
+.system-exam-card.complete {
+  border-color: rgba(101, 209, 132, .45);
+}
+
+.exam-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.exam-head p {
+  margin-bottom: 0;
+}
+
+.virtual-env {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.virtual-rail {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(26, 178, 168, .12), transparent),
+    rgba(0, 0, 0, .14);
+  border-right: 1px solid var(--line);
+}
+
+.virtual-rail strong {
+  margin-bottom: 4px;
+}
+
+.virtual-nav-button {
+  min-height: 36px;
+  padding: 8px 10px;
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.virtual-nav-button.active,
+.virtual-nav-button:hover {
+  color: var(--ink);
+  border-color: rgba(26, 178, 168, .35);
+  background: var(--primary-soft);
+}
+
+.virtual-screen {
+  padding: 14px;
+}
+
+.virtual-topbar {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.virtual-topbar span:last-child {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.status-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 5px rgba(101, 209, 132, .14);
+}
+
+.virtual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.virtual-tile {
+  min-height: 116px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.virtual-tile.wide {
+  grid-column: 1 / -1;
+}
+
+.virtual-tile span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--primary-strong);
+  font-size: .76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.virtual-tile p {
+  margin-bottom: 0;
+}
+
+.exam-workbench {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.code-rune-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.code-rune {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #11151b;
+}
+
+html[data-theme="light"] .code-rune {
+  background: #16201f;
+}
+
+.code-rune figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #e8fbf8;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  background: rgba(26, 178, 168, .14);
+  font-weight: 900;
+}
+
+.code-rune figcaption b {
+  color: #80e5dc;
+  font-size: .78rem;
+  text-transform: uppercase;
+}
+
+.code-rune pre {
+  padding: 13px;
+  color: #f7fff9;
+}
+
+.quick-drill {
+  margin-top: 18px;
+}
+
+.student-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.student-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.student-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.student-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.student-form label span {
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+
+.student-form input,
+.student-form select {
+  min-height: 42px;
+  width: 100%;
+  padding: 0 11px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.student-database {
+  overflow: hidden;
+}
+
+.student-table {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.student-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 92px;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.student-row.active {
+  border-color: rgba(26, 178, 168, .45);
+}
+
+.student-row span,
+.student-row time {
+  color: var(--muted);
+  font-size: .86rem;
+}
+
 .simulator-card {
   max-width: 880px;
 }
@@ -1137,7 +1399,10 @@ pre {
   .library-grid,
   .lab-grid,
   .charm-list,
-  .checklist-layout {
+  .checklist-layout,
+  .system-exam-overview,
+  .exam-workbench,
+  .code-rune-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1177,7 +1442,8 @@ pre {
 
   .hero,
   .boss-welcome,
-  .boss-panel {
+  .boss-panel,
+  .virtual-env {
     grid-template-columns: 1fr;
   }
 
@@ -1188,7 +1454,32 @@ pre {
   .lab-grid,
   .charm-list,
   .checklist-layout,
+  .system-exam-overview,
+  .exam-workbench,
+  .code-rune-grid,
   .scroll-body {
+    grid-template-columns: 1fr;
+  }
+
+  .virtual-rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .virtual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .exam-head,
+  .student-hero {
+    display: block;
+  }
+
+  .student-actions {
+    margin-top: 12px;
+  }
+
+  .student-row {
     grid-template-columns: 1fr;
   }
 

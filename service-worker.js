@@ -1,4 +1,4 @@
-const CACHE = "sap-spellbook-academy-v2";
+const CACHE = "sap-spellbook-academy-v3";
 const ASSETS = [
   "./",
   "./index.html",
